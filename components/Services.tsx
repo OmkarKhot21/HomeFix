@@ -114,7 +114,7 @@ export default function Services() {
                   }}
                   className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-slate-50 hover:bg-slate-900 hover:text-white font-bold text-xs uppercase tracking-wider text-slate-800 border border-slate-200/80 hover:border-slate-900 transition-all duration-200"
                 >
-                  Book in App <ArrowRight size={13} />
+                  Book Now <ArrowRight size={13} />
                 </button>
               </div>
             );

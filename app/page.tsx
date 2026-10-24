@@ -5,7 +5,6 @@ import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import KpiSection from '@/components/KpiSection';
 import Services from '@/components/Services';
-import PhoneMockup from '@/components/PhoneMockup';
 import AppDownloadBanner from '@/components/AppDownloadBanner';
 import Footer from '@/components/Footer';
 import LeadCaptureModal from '@/components/LeadCaptureModal';
@@ -42,7 +41,6 @@ export default function Home() {
         <Hero />
         <KpiSection />
         <Services />
-        <PhoneMockup />
         <AppDownloadBanner />
         <Footer onOpenInvestor={() => setIsInvestorModalOpen(true)} />
       </div>
