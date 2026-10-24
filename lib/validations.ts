@@ -13,14 +13,15 @@ export const adminLoginSchema = z.object({
   next: z
     .string()
     .optional()
-    .refine(
-      (val) => {
-        if (!val) return true;
-        // Anti-Open-Redirect: must start with /admin, no protocol-relative slashes (//) or backslashes
-        return val.startsWith('/admin') && !val.startsWith('//') && !val.includes('\\');
-      },
-      { message: 'Invalid redirect destination.' }
-    ),
+    .transform((val) => {
+      if (!val) return '/admin';
+      const clean = val.trim();
+      // Anti-Open-Redirect: must start with /admin, no protocol-relative slashes (//) or backslashes
+      if (clean.startsWith('/admin') && !clean.startsWith('//') && !clean.includes('\\')) {
+        return clean;
+      }
+      return '/admin';
+    }),
 });
 
 export const investorLeadSchema = z.object({

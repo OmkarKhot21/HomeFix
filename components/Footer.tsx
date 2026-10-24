@@ -1,7 +1,9 @@
+'use client';
+
 import { MapPin, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
-export default function Footer() {
+export default function Footer({ onOpenInvestor }: { onOpenInvestor?: () => void }) {
   return (
     <footer className="bg-black text-slate-100 py-16 border-t border-slate-800">
       <div className="container mx-auto px-6 max-w-7xl">
@@ -48,6 +50,17 @@ export default function Footer() {
               <li><a href="https://play.google.com/store" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Google Play Store</a></li>
               <li><a href="https://www.apple.com/app-store/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Apple App Store</a></li>
               <li><a href="#instagram-community" className="hover:text-white transition-colors">Instagram Community</a></li>
+              {onOpenInvestor && (
+                <li>
+                  <button 
+                    type="button" 
+                    onClick={onOpenInvestor} 
+                    className="hover:text-white transition-colors text-left"
+                  >
+                    Investors & Deck ↗
+                  </button>
+                </li>
+              )}
               <li><Link href="/admin/login" className="text-slate-500 hover:text-slate-300 transition-colors text-xs">Admin Console ↗</Link></li>
             </ul>
           </div>

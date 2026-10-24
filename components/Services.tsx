@@ -106,7 +106,7 @@ export default function Services() {
                     const el = document.getElementById('get-app');
                     if (el) {
                       el.scrollIntoView({ behavior: 'smooth' });
-                      const input = el.querySelector('input');
+                      const input = el.querySelector<HTMLInputElement>('input[name="phone"]');
                       if (input) {
                         setTimeout(() => input.focus(), 400);
                       }

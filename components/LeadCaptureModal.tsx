@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, ChartLine, Loader2, CheckCircle2 } from 'lucide-react';
 import { captureInvestor } from '@/app/actions/captureLead';
 
@@ -11,16 +11,39 @@ export default function LeadCaptureModal({
   isOpen: boolean, 
   onClose: () => void 
 }) {
+  const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   async function handleSubmit(formData: FormData) {
+    setErrorMessage('');
     setStatus('loading');
-    const res = await captureInvestor(formData);
-    if (res.success) {
-      setStatus('success');
-    } else {
+    try {
+      const res = await captureInvestor(formData);
+      if ('success' in res && res.success) {
+        setStatus('success');
+      } else {
+        setStatus('idle');
+        setErrorMessage('error' in res && res.error ? res.error : 'Error capturing email.');
+      }
+    } catch {
       setStatus('idle');
-      alert('Error capturing email.');
+      setErrorMessage('Something went wrong. Please try again.');
     }
   }
 
@@ -30,7 +53,9 @@ export default function LeadCaptureModal({
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[2000] flex items-center justify-center p-4 animate-in fade-in">
       <div className="bg-white rounded-3xl p-8 w-full max-w-md relative border-2 border-black shadow-2xl">
         <button 
+          type="button"
           onClick={onClose}
+          aria-label="Close"
           className="absolute top-5 right-5 text-slate-400 hover:text-black transition-colors"
         >
           <X size={24} />
@@ -49,13 +74,7 @@ export default function LeadCaptureModal({
             <div className="bg-emerald-50 text-emerald-800 p-6 rounded-2xl border border-emerald-200">
               <CheckCircle2 size={32} className="mx-auto mb-3 text-emerald-600" />
               <h4 className="font-bold mb-1">Success!</h4>
-              <p className="text-sm mb-4">Your access link has been generated.</p>
-              <a 
-                href="#" 
-                className="inline-block w-full bg-emerald-600 text-white font-semibold py-3 rounded-xl hover:bg-emerald-700 transition"
-              >
-                Download PDF
-              </a>
+              <p className="text-sm">Thanks! We&apos;ll email you the deck within 24 hours.</p>
             </div>
           ) : (
             <form action={handleSubmit} className="text-left relative">
@@ -72,10 +91,20 @@ export default function LeadCaptureModal({
                 <input 
                   type="email" 
                   name="email" 
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errorMessage) setErrorMessage('');
+                  }}
                   required
-                  placeholder="investor@vc.com" 
+                  placeholder="partner@venturefund.com" 
                   className="w-full border-2 border-black rounded-xl px-4 py-3 focus:outline-none focus:ring-4 ring-slate-200 transition-all font-body"
                 />
+                {errorMessage && (
+                  <p className="text-xs font-semibold text-red-600 mt-2">
+                    {errorMessage}
+                  </p>
+                )}
               </div>
               <button 
                 type="submit" 

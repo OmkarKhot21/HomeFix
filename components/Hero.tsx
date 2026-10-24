@@ -7,27 +7,32 @@ import { captureWaitlist } from '@/app/actions/captureLead';
 export default function Hero() {
   const [phone, setPhone] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleGetLink = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!phone || phone.length < 10) {
       setStatus('error');
+      setErrorMessage('Please enter a valid 10-digit mobile number.');
       return;
     }
 
     setStatus('loading');
+    setErrorMessage('');
     const formData = new FormData(e.currentTarget);
     formData.set('phone', phone);
     
     try {
       const res = await captureWaitlist(formData);
-      if (res.success) {
+      if ('success' in res && res.success) {
         setStatus('success');
       } else {
         setStatus('error');
+        setErrorMessage('error' in res && res.error ? res.error : 'Please enter a valid 10-digit mobile number.');
       }
     } catch {
       setStatus('error');
+      setErrorMessage('Something went wrong. Please try again.');
     }
   };
 
@@ -77,7 +82,7 @@ export default function Hero() {
               {status === 'success' ? (
                 <div className="flex items-center gap-3 p-3 text-emerald-800 bg-emerald-50/80 rounded-xl font-semibold text-sm">
                   <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
-                  <span>Download link sent! Check your SMS/WhatsApp shortly.</span>
+                  <span>You&apos;re on the list! We&apos;ll text you the app link at launch.</span>
                 </div>
               ) : (
                 <form onSubmit={handleGetLink} className="flex flex-col sm:flex-row gap-2 relative">
@@ -95,7 +100,13 @@ export default function Hero() {
                       type="tel"
                       name="phone"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (status === 'error' || errorMessage) {
+                          setStatus('idle');
+                          setErrorMessage('');
+                        }
+                      }}
                       placeholder="Enter mobile number"
                       className="bg-transparent text-sm font-medium w-full focus:outline-none text-slate-900 placeholder:text-slate-400"
                       maxLength={10}
@@ -114,9 +125,9 @@ export default function Hero() {
               )}
             </div>
 
-            {status === 'error' && (
+            {status === 'error' && errorMessage && (
               <p className="text-xs font-semibold text-red-600 mb-4 -mt-2">
-                Please enter a valid 10-digit mobile number.
+                {errorMessage}
               </p>
             )}
 

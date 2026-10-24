@@ -3,7 +3,7 @@
 import { Menu, X, Smartphone } from 'lucide-react';
 import { useState } from 'react';
 
-export default function Navbar() {
+export default function Navbar({ onOpenInvestor }: { onOpenInvestor?: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -33,6 +33,20 @@ export default function Navbar() {
             <li><a href="#why-us" className="hover:text-black transition-colors">Why HomeFix</a></li>
             <li><a href="#how-it-works" className="hover:text-black transition-colors">How It Works</a></li>
             <li><a href="#coverage" className="hover:text-black transition-colors">Areas Covered</a></li>
+            {onOpenInvestor && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onOpenInvestor();
+                    setIsOpen(false);
+                  }}
+                  className="hover:text-black transition-colors font-semibold text-sm text-slate-600 text-left"
+                >
+                  Investors
+                </button>
+              </li>
+            )}
           </ul>
           
           <a 

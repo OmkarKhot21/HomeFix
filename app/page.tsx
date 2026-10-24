@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import KpiSection from '@/components/KpiSection';
@@ -7,8 +8,11 @@ import Services from '@/components/Services';
 import PhoneMockup from '@/components/PhoneMockup';
 import AppDownloadBanner from '@/components/AppDownloadBanner';
 import Footer from '@/components/Footer';
+import LeadCaptureModal from '@/components/LeadCaptureModal';
 
 export default function Home() {
+  const [isInvestorModalOpen, setIsInvestorModalOpen] = useState(false);
+
   return (
     <main className="relative min-h-screen bg-slate-50 selection:bg-black selection:text-white overflow-x-hidden">
       
@@ -34,14 +38,19 @@ export default function Home() {
 
       {/* Page Content Layers */}
       <div className="relative z-10">
-        <Navbar />
+        <Navbar onOpenInvestor={() => setIsInvestorModalOpen(true)} />
         <Hero />
         <KpiSection />
         <Services />
         <PhoneMockup />
         <AppDownloadBanner />
-        <Footer />
+        <Footer onOpenInvestor={() => setIsInvestorModalOpen(true)} />
       </div>
+
+      <LeadCaptureModal 
+        isOpen={isInvestorModalOpen} 
+        onClose={() => setIsInvestorModalOpen(false)} 
+      />
 
     </main>
   );
