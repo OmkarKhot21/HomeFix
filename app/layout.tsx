@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import DesignSwitcher from "@/components/DesignSwitcher";
 
 export const metadata: Metadata = {
   title: "HomeFix | Fixing Homes, Improving Lives",
@@ -15,6 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         {children}
+        <DesignSwitcher />
       </body>
     </html>
   );
