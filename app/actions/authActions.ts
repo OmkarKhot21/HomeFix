@@ -56,7 +56,7 @@ export async function loginAction(
     value: token,
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict', // Strict CSRF protection
+    sameSite: 'lax',
     maxAge: 60 * 60 * 12, // 12 hours
     path: '/',
   });

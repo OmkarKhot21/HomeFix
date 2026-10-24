@@ -58,12 +58,20 @@ export default function LeadCaptureModal({
               </a>
             </div>
           ) : (
-            <form action={handleSubmit} className="text-left">
+            <form action={handleSubmit} className="text-left relative">
+              <input 
+                type="text" 
+                name="website" 
+                tabIndex={-1} 
+                autoComplete="off" 
+                aria-hidden="true" 
+                className="absolute -left-[9999px] opacity-0 pointer-events-none" 
+              />
               <div className="mb-4">
                 <label className="block text-sm font-bold text-slate-700 mb-2">Work Email</label>
                 <input 
                   type="email" 
-                  name="email"
+                  name="email" 
                   required
                   placeholder="investor@vc.com" 
                   className="w-full border-2 border-black rounded-xl px-4 py-3 focus:outline-none focus:ring-4 ring-slate-200 transition-all font-body"

@@ -52,7 +52,15 @@ export default function WaitlistDrawer({
               <p className="text-sm">We&apos;ll text you a download link as soon as we launch in your area.</p>
             </div>
           ) : (
-            <form action={handleSubmit} className="text-left">
+            <form action={handleSubmit} className="text-left relative">
+              <input 
+                type="text" 
+                name="website" 
+                tabIndex={-1} 
+                autoComplete="off" 
+                aria-hidden="true" 
+                className="absolute -left-[9999px] opacity-0 pointer-events-none" 
+              />
               <div className="mb-4">
                 <div className="flex border-2 border-black rounded-xl overflow-hidden focus-within:ring-4 ring-slate-200 transition-all">
                   <span className="bg-slate-50 px-4 py-3 font-bold text-slate-500 border-r border-slate-200">+91</span>

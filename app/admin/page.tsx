@@ -18,8 +18,7 @@ export default async function AdminDashboardPage() {
   // Reusable security boundary: throws redirect if session is missing, invalid, or expired
   const session = await requireAdmin();
 
-  const leads = getAllLeadsUnified();
-  const metrics = getLeadMetrics();
+  const [leads, metrics] = await Promise.all([getAllLeadsUnified(), getLeadMetrics()]);
 
   return (
     <AdminDashboardClient

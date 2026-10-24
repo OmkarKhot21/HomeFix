@@ -15,6 +15,12 @@ export async function captureInvestor(formData: FormData) {
     return { error: 'Too many requests. Please try again in a few minutes.' };
   }
 
+  // Honeypot check: reject bot submissions silently
+  const honeypot = formData.get('website');
+  if (typeof honeypot === 'string' && honeypot.length > 0) {
+    return { success: true };
+  }
+
   const rawEmail = formData.get('email');
   const parseResult = investorLeadSchema.safeParse({ email: rawEmail });
 
@@ -25,7 +31,7 @@ export async function captureInvestor(formData: FormData) {
   const { email } = parseResult.data;
 
   try {
-    db.addInvestor(email);
+    await db.addInvestor(email);
     return { success: true };
   } catch (err) {
     console.error('[DATABASE ERROR in captureInvestor]:', err);
@@ -43,6 +49,12 @@ export async function captureWaitlist(formData: FormData) {
     return { error: 'Too many requests. Please try again in a few minutes.' };
   }
 
+  // Honeypot check: reject bot submissions silently
+  const honeypot = formData.get('website');
+  if (typeof honeypot === 'string' && honeypot.length > 0) {
+    return { success: true };
+  }
+
   const rawPhone = formData.get('phone');
   const parseResult = waitlistLeadSchema.safeParse({ phone: rawPhone });
 
@@ -55,7 +67,7 @@ export async function captureWaitlist(formData: FormData) {
   const { phone } = parseResult.data;
 
   try {
-    db.addWaitlist(phone);
+    await db.addWaitlist(phone);
     return { success: true };
   } catch (err) {
     console.error('[DATABASE ERROR in captureWaitlist]:', err);

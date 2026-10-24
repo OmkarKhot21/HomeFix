@@ -11,10 +11,12 @@ function sanitizeCsvField(value: string | number | null | undefined): string {
   // Remove dangerous control characters (preserve standard printable characters)
   str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 
-  // Formula Injection Defense (CWE-1236): Neutralize Excel/Sheets command characters
-  // Including leading whitespace bypasses (e.g., '  =cmd|')
   const trimmed = str.trimStart();
-  if (/^[=+\-@\t\r|%]/.test(trimmed)) {
+
+  // Formula Injection Defense (CWE-1236): Neutralize Excel/Sheets command characters
+  // Do not prefix values that fully match valid phone numbers /^\+?\d{10,14}$/
+  const isPhoneNumber = /^\+?\d{10,14}$/.test(trimmed);
+  if (!isPhoneNumber && /^[=+\-@\t\r|%]/.test(trimmed)) {
     str = `'${str}`;
   }
 
@@ -35,7 +37,7 @@ export async function GET() {
     });
   }
 
-  const leads = getAllLeadsUnified();
+  const leads = await getAllLeadsUnified();
 
   const headers = ['Lead ID', 'Type', 'Contact Details', 'ISO Timestamp', 'Formatted Date'];
   const rows = leads.map((lead) => {

@@ -8,7 +8,7 @@ export default function Hero() {
   const [phone, setPhone] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  const handleGetLink = async (e: React.FormEvent) => {
+  const handleGetLink = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!phone || phone.length < 10) {
       setStatus('error');
@@ -16,8 +16,8 @@ export default function Hero() {
     }
 
     setStatus('loading');
-    const formData = new FormData();
-    formData.append('phone', phone);
+    const formData = new FormData(e.currentTarget);
+    formData.set('phone', phone);
     
     try {
       const res = await captureWaitlist(formData);
@@ -80,11 +80,20 @@ export default function Hero() {
                   <span>Download link sent! Check your SMS/WhatsApp shortly.</span>
                 </div>
               ) : (
-                <form onSubmit={handleGetLink} className="flex flex-col sm:flex-row gap-2">
+                <form onSubmit={handleGetLink} className="flex flex-col sm:flex-row gap-2 relative">
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="absolute -left-[9999px] opacity-0 pointer-events-none"
+                  />
                   <div className="flex items-center px-3.5 py-2.5 bg-slate-50/80 rounded-xl border border-slate-200/80 flex-1">
                     <span className="text-xs font-bold text-slate-500 mr-2.5 border-r border-slate-300 pr-2.5">+91</span>
                     <input 
                       type="tel"
+                      name="phone"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="Enter mobile number"

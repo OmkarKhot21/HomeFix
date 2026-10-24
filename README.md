@@ -56,8 +56,8 @@ HomeFix implements multi-layer defense-in-depth across the entire request lifecy
    - Credentials checked via `crypto.timingSafeEqual` over SHA-256 digests.
 7. **Spreadsheet Formula Injection Defense (CWE-1236)**:
    - CSV export sanitization neutralizes leading whitespace and execution command operators (`=`, `+`, `-`, `@`, `|`, `%`).
-8. **Serverless Filesystem Resilience**:
-   - Fault-tolerant database abstraction automatically detects read-only cloud lambdas and redirects file writes to `/tmp/leads.json` to eliminate serverless `EROFS` crashes.
+8. **Serverless Cloud Database (Neon Postgres)**:
+   - High-performance serverless PostgreSQL persistence via Neon (`@neondatabase/serverless`) replacing ephemeral local file stores.
 9. **Enterprise HTTP Headers (`next.config.ts`)**:
    - `Content-Security-Policy`, `X-Frame-Options: DENY` (Anti-Clickjacking), `X-Content-Type-Options: nosniff`, `Strict-Transport-Security` (HSTS), and `Permissions-Policy`.
 

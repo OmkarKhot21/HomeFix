@@ -1,62 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-
-// Resolve writable database path: On Vercel serverless, process.cwd() is read-only.
-function resolveDbPath(): string {
-  const isVercel = process.env.VERCEL === '1';
-  if (isVercel) {
-    const tmpPath = path.join('/tmp', 'leads.json');
-    if (!fs.existsSync(tmpPath)) {
-      const bundledPath = path.join(process.cwd(), 'leads.json');
-      try {
-        if (fs.existsSync(bundledPath)) {
-          fs.copyFileSync(bundledPath, tmpPath);
-        } else {
-          fs.writeFileSync(tmpPath, JSON.stringify({ investors: [], waitlist: [] }, null, 2), 'utf8');
-        }
-      } catch {
-        try {
-          fs.writeFileSync(tmpPath, JSON.stringify({ investors: [], waitlist: [] }, null, 2), 'utf8');
-        } catch {}
-      }
-    }
-    return tmpPath;
-  }
-
-  const localPath = path.join(process.cwd(), 'leads.json');
-  try {
-    if (!fs.existsSync(localPath)) {
-      fs.writeFileSync(localPath, JSON.stringify({ investors: [], waitlist: [] }, null, 2), 'utf8');
-    }
-  } catch {
-    // If local path is unexpectedly read-only, fallback to /tmp
-    const tmpFallback = path.join('/tmp', 'leads.json');
-    if (!fs.existsSync(tmpFallback)) {
-      try {
-        fs.writeFileSync(tmpFallback, JSON.stringify({ investors: [], waitlist: [] }, null, 2), 'utf8');
-      } catch {}
-    }
-    return tmpFallback;
-  }
-  return localPath;
-}
-
-export interface InvestorLead {
-  id?: string;
-  email: string;
-  timestamp: string;
-}
-
-export interface WaitlistLead {
-  id?: string;
-  phone: string;
-  timestamp: string;
-}
-
-export interface DatabaseSchema {
-  investors: InvestorLead[];
-  waitlist: WaitlistLead[];
-}
+import { neon } from '@neondatabase/serverless';
 
 export interface UnifiedLead {
   id: string;
@@ -73,92 +15,55 @@ export interface LeadMetrics {
   latestLeadRelative: string;
 }
 
-function atomicWriteFileSync(filePath: string, content: string): void {
-  const dir = path.dirname(filePath);
-  const tmpPath = path.join(dir, `.${path.basename(filePath)}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`);
-  
-  try {
-    fs.writeFileSync(tmpPath, content, 'utf8');
-    try {
-      fs.renameSync(tmpPath, filePath);
-    } catch (err: unknown) {
-      const error = err as { code?: string };
-      if (error.code === 'EEXIST' || error.code === 'EPERM') {
-        fs.copyFileSync(tmpPath, filePath);
-        try {
-          fs.unlinkSync(tmpPath);
-        } catch {}
-      } else {
-        try {
-          fs.unlinkSync(tmpPath);
-        } catch {}
-        throw err;
-      }
-    }
-  } catch (err) {
-    // Direct overwrite fallback if atomic rename is restricted
-    fs.writeFileSync(filePath, content, 'utf8');
+interface RawLeadRow {
+  id: string | number;
+  type: string;
+  contact: string;
+  created_at: string | Date;
+}
+
+function getSql() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is missing.');
   }
+  return neon(databaseUrl);
 }
 
-function readDatabase(): DatabaseSchema {
-  const dbPath = resolveDbPath();
-  try {
-    if (!fs.existsSync(dbPath)) {
-      return { investors: [], waitlist: [] };
-    }
-    const data = fs.readFileSync(dbPath, 'utf8');
-    const parsed = JSON.parse(data);
-    return {
-      investors: Array.isArray(parsed?.investors) ? parsed.investors : [],
-      waitlist: Array.isArray(parsed?.waitlist) ? parsed.waitlist : [],
-    };
-  } catch {
-    return { investors: [], waitlist: [] };
-  }
+export async function addLead(type: 'investor' | 'waitlist', contact: string): Promise<void> {
+  const sql = getSql();
+  await sql`insert into leads (type, contact) values (${type}, ${contact}) on conflict (type, contact) do nothing`;
 }
 
-function writeDatabase(data: DatabaseSchema): void {
-  const dbPath = resolveDbPath();
-  atomicWriteFileSync(dbPath, JSON.stringify(data, null, 2));
+export async function addInvestor(email: string): Promise<void> {
+  await addLead('investor', email);
 }
 
-export function getAllLeadsUnified(): UnifiedLead[] {
-  const data = readDatabase();
-  const investorLeads: UnifiedLead[] = data.investors.map((inv, idx) => ({
-    id: inv.id || `inv_${idx}_${new Date(inv.timestamp).getTime() || idx}`,
-    type: 'investor',
-    contact: inv.email,
-    timestamp: inv.timestamp,
+export async function addWaitlist(phone: string): Promise<void> {
+  await addLead('waitlist', phone);
+}
+
+export async function getAllLeadsUnified(): Promise<UnifiedLead[]> {
+  const sql = getSql();
+  const rows = (await sql`select id, type, contact, created_at from leads order by created_at desc`) as RawLeadRow[];
+
+  return rows.map((row) => ({
+    id: `${row.type}_${row.id}`,
+    type: row.type as 'investor' | 'waitlist',
+    contact: row.contact,
+    timestamp: new Date(row.created_at).toISOString(),
   }));
-
-  const waitlistLeads: UnifiedLead[] = data.waitlist.map((wait, idx) => ({
-    id: wait.id || `wait_${idx}_${new Date(wait.timestamp).getTime() || idx}`,
-    type: 'waitlist',
-    contact: wait.phone,
-    timestamp: wait.timestamp,
-  }));
-
-  return [...investorLeads, ...waitlistLeads].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  );
 }
 
-export function getLeadMetrics(): LeadMetrics {
-  const data = readDatabase();
-  const investorCount = data.investors.length;
-  const waitlistCount = data.waitlist.length;
-  const totalLeads = investorCount + waitlistCount;
-
-  const allTimestamps = [
-    ...data.investors.map((i) => i.timestamp),
-    ...data.waitlist.map((w) => w.timestamp),
-  ].filter(Boolean);
+export async function getLeadMetrics(): Promise<LeadMetrics> {
+  const leads = await getAllLeadsUnified();
+  const investorCount = leads.filter((lead) => lead.type === 'investor').length;
+  const waitlistCount = leads.filter((lead) => lead.type === 'waitlist').length;
+  const totalLeads = leads.length;
 
   let latestLeadTimestamp: string | null = null;
-  if (allTimestamps.length > 0) {
-    allTimestamps.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
-    latestLeadTimestamp = allTimestamps[0];
+  if (leads.length > 0) {
+    latestLeadTimestamp = leads[0].timestamp;
   }
 
   let latestLeadRelative = 'No activity yet';
@@ -188,21 +93,8 @@ export function getLeadMetrics(): LeadMetrics {
 }
 
 export const db = {
-  getLeads: (): DatabaseSchema => {
-    return readDatabase();
-  },
-  addInvestor: (email: string): void => {
-    const leads = readDatabase();
-    const id = `inv_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    leads.investors.push({ id, email, timestamp: new Date().toISOString() });
-    writeDatabase(leads);
-  },
-  addWaitlist: (phone: string): void => {
-    const leads = readDatabase();
-    const id = `wait_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    leads.waitlist.push({ id, phone, timestamp: new Date().toISOString() });
-    writeDatabase(leads);
-  },
+  addInvestor,
+  addWaitlist,
   getAllLeadsUnified,
   getLeadMetrics,
 };

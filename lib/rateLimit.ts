@@ -68,9 +68,5 @@ export function extractClientIp(headers: Headers): string {
   if (realIp) {
     return realIp.trim();
   }
-  const cfConnectingIp = headers.get('cf-connecting-ip');
-  if (cfConnectingIp) {
-    return cfConnectingIp.trim();
-  }
   return 'unknown-client';
 }
