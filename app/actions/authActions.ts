@@ -17,9 +17,9 @@ export async function loginAction(
   const reqHeaders = await headers();
   const clientIp = extractClientIp(reqHeaders);
 
-  // Rate Limiting: Max 5 attempts per 15 minutes per IP
+  // Rate Limiting: Max 5 attempts per 15 minutes per IP (fail-closed on network errors)
   const rateLimitKey = `auth_login:${clientIp}`;
-  const rateLimit = checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000);
+  const rateLimit = await checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000, { failClosed: true });
 
   if (!rateLimit.allowed) {
     return {

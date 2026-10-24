@@ -10,7 +10,7 @@ export async function captureInvestor(formData: FormData) {
   const clientIp = extractClientIp(reqHeaders);
 
   // Rate Limiting: Max 10 submissions per 5 minutes per IP
-  const rateLimit = checkRateLimit(`lead_inv:${clientIp}`, 10, 5 * 60 * 1000);
+  const rateLimit = await checkRateLimit(`lead_inv:${clientIp}`, 10, 5 * 60 * 1000);
   if (!rateLimit.allowed) {
     return { error: 'Too many requests. Please try again in a few minutes.' };
   }
@@ -44,7 +44,7 @@ export async function captureWaitlist(formData: FormData) {
   const clientIp = extractClientIp(reqHeaders);
 
   // Rate Limiting: Max 10 submissions per 5 minutes per IP
-  const rateLimit = checkRateLimit(`lead_wait:${clientIp}`, 10, 5 * 60 * 1000);
+  const rateLimit = await checkRateLimit(`lead_wait:${clientIp}`, 10, 5 * 60 * 1000);
   if (!rateLimit.allowed) {
     return { error: 'Too many requests. Please try again in a few minutes.' };
   }
