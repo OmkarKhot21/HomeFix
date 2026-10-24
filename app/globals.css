@@ -45,3 +45,104 @@ h1, h2, h3, h4, .font-display {
 .animate-pulse-dot {
   animation: pulseDot 2s infinite;
 }
+
+/* ===== Instant Booking Menu icon animations (components/RepairIcons.tsx) ===== */
+.hf-drip { transform-box: fill-box; transform-origin: center; animation: hf-drip 1.6s ease-in infinite; }
+@keyframes hf-drip {
+  0% { transform: translateY(-2px) scale(0.3); opacity: 0; }
+  25% { transform: translateY(0) scale(1); opacity: 1; }
+  60% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(7px) scale(1); opacity: 0; }
+}
+
+.hf-wrench { transform-box: fill-box; transform-origin: 75% 25%; animation: hf-wrench 1.4s ease-in-out infinite; }
+@keyframes hf-wrench {
+  0%, 100% { transform: rotate(-16deg); }
+  50% { transform: rotate(16deg); }
+}
+
+.hf-spray { animation: hf-spray 0.9s linear infinite; }
+@keyframes hf-spray {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(6px, 6px); opacity: 0; }
+}
+
+.hf-flame { transform-box: fill-box; transform-origin: 50% 100%; animation: hf-flame 0.45s ease-in-out infinite alternate; }
+@keyframes hf-flame {
+  0% { transform: scale(1, 1) skewX(0deg); }
+  50% { transform: scale(0.95, 1.1) skewX(-4deg); }
+  100% { transform: scale(1.04, 0.94) skewX(3deg); }
+}
+
+/* Fan: accelerates for ~2s, then stops dead and rests */
+.hf-fan { transform-box: view-box; transform-origin: 12px 12px; animation: hf-fan 3.2s infinite; }
+@keyframes hf-fan {
+  0% { transform: rotate(0deg); animation-timing-function: cubic-bezier(0.55, 0, 1, 1); }
+  65% { transform: rotate(1800deg); }
+  100% { transform: rotate(1800deg); }
+}
+
+.hf-plug { transform-box: view-box; animation: hf-plug 1.8s ease-in-out infinite; }
+@keyframes hf-plug {
+  0%, 100% { transform: translateY(3px); }
+  40%, 75% { transform: translateY(0); }
+}
+.hf-spark { opacity: 0; animation: hf-spark 1.8s infinite; }
+@keyframes hf-spark {
+  0%, 38% { opacity: 0; }
+  44% { opacity: 1; }
+  58%, 100% { opacity: 0; }
+}
+
+.hf-glow { animation: hf-glow 3s infinite; }
+@keyframes hf-glow {
+  0%, 48%, 62%, 100% { opacity: 1; filter: drop-shadow(0 0 4px currentColor); }
+  50% { opacity: 0.3; filter: none; }
+  53% { opacity: 1; filter: drop-shadow(0 0 4px currentColor); }
+  56% { opacity: 0.4; filter: none; }
+}
+
+.hf-shackle { transform-box: view-box; animation: hf-shackle 2.4s ease-in-out infinite; }
+@keyframes hf-shackle {
+  0%, 25%, 100% { transform: translateY(0); }
+  40%, 70% { transform: translateY(-4.5px); }
+  78% { transform: translateY(0.4px); }
+  84% { transform: translateY(0); }
+}
+
+.hf-squish { transform-box: fill-box; transform-origin: 50% 100%; animation: hf-squish 2.2s ease-out infinite; }
+@keyframes hf-squish {
+  0%, 55%, 100% { transform: scale(1, 1); }
+  65% { transform: scale(1.08, 0.86); }
+  75% { transform: scale(0.97, 1.05); }
+  85% { transform: scale(1.02, 0.98); }
+}
+
+/* Drill: buzzes for half the cycle, then rests */
+.hf-drill { animation: hf-drill 2s linear infinite; }
+@keyframes hf-drill {
+  0%, 50%, 100% { transform: translate(0, 0); }
+  5% { transform: translate(-0.5px, 0.3px); }
+  10% { transform: translate(0.4px, -0.3px); }
+  15% { transform: translate(-0.4px, -0.2px); }
+  20% { transform: translate(0.5px, 0.3px); }
+  25% { transform: translate(-0.3px, 0.2px); }
+  30% { transform: translate(0.4px, -0.4px); }
+  35% { transform: translate(-0.5px, 0.2px); }
+  40% { transform: translate(0.3px, 0.3px); }
+  45% { transform: translate(-0.4px, -0.3px); }
+}
+.hf-bit { stroke-dasharray: 1.5 1.5; animation: hf-bit 0.25s linear infinite; }
+@keyframes hf-bit { to { stroke-dashoffset: -3; } }
+.hf-dust { opacity: 0; animation: hf-dust 2s infinite; }
+@keyframes hf-dust {
+  0% { opacity: 0; transform: translate(0, 0); }
+  10% { opacity: 1; }
+  45% { opacity: 0; transform: translate(1.5px, -1.5px); }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hf-anim, .hf-anim * { animation: none !important; }
+}
