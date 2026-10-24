@@ -4,6 +4,7 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { verifyCredentials, createSessionToken, SESSION_COOKIE_NAME } from '@/lib/auth';
 import { checkRateLimit, extractClientIp } from '@/lib/rateLimit';
+import { adminLoginSchema } from '@/lib/validations';
 
 export interface AuthState {
   error?: string;
@@ -28,30 +29,26 @@ export async function loginAction(
     };
   }
 
-  const username = formData.get('username');
-  const password = formData.get('password');
+  // Schema Validation via Zod
+  const rawData = {
+    username: formData.get('username'),
+    password: formData.get('password'),
+    next: formData.get('next') || undefined,
+  };
 
-  if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
-    return { error: 'Username and password are required.' };
+  const parseResult = adminLoginSchema.safeParse(rawData);
+  if (!parseResult.success) {
+    return { error: parseResult.error.issues[0]?.message || 'Invalid input credentials.' };
   }
 
-  const cleanUser = username.trim();
-  const cleanPass = password;
+  const { username, password, next } = parseResult.data;
 
-  if (cleanUser.length === 0 || cleanPass.length === 0) {
-    return { error: 'Username and password cannot be empty.' };
-  }
-
-  if (cleanUser.length > 128 || cleanPass.length > 256) {
-    return { error: 'Invalid input format.' };
-  }
-
-  const isValid = verifyCredentials(cleanUser, cleanPass);
+  const isValid = verifyCredentials(username, password);
   if (!isValid) {
     return { error: 'Invalid credentials. Access denied.' };
   }
 
-  const token = await createSessionToken(cleanUser);
+  const token = await createSessionToken(username);
   const cookieStore = await cookies();
 
   cookieStore.set({
@@ -59,12 +56,14 @@ export async function loginAction(
     value: token,
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict', // Upgraded to strict to defeat CSRF completely
+    sameSite: 'strict', // Strict CSRF protection
     maxAge: 60 * 60 * 12, // 12 hours
     path: '/',
   });
 
-  redirect('/admin');
+  // Safe open-redirect protected destination
+  const targetDestination = next || '/admin';
+  redirect(targetDestination);
 }
 
 export async function logoutAction(): Promise<void> {

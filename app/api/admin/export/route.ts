@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { getAllLeadsUnified } from '@/lib/db';
-import { verifySessionToken, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { verifyAdminApi } from '@/lib/auth';
 
 function sanitizeCsvField(value: string | number | null | undefined): string {
   if (value === null || value === undefined) {
@@ -24,16 +23,16 @@ function sanitizeCsvField(value: string | number | null | undefined): string {
 }
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-  if (!sessionCookie) {
-    return new NextResponse('Unauthorized: No session token provided', { status: 401 });
-  }
-
-  const session = await verifySessionToken(sessionCookie);
-  if (!session.valid) {
-    return new NextResponse('Unauthorized: Invalid or expired session', { status: 401 });
+  // Enforce session check on admin API route
+  const auth = await verifyAdminApi();
+  if (!auth.authorized) {
+    return new NextResponse('Unauthorized: Valid admin session token required.', {
+      status: 401,
+      headers: {
+        'Content-Type': 'text/plain',
+        'WWW-Authenticate': 'Bearer error="invalid_token"',
+      },
+    });
   }
 
   const leads = getAllLeadsUnified();

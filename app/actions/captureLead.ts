@@ -3,17 +3,7 @@
 import { headers } from 'next/headers';
 import { db } from '@/lib/db';
 import { checkRateLimit, extractClientIp } from '@/lib/rateLimit';
-
-// Sanitize string to remove any HTML tags and dangerous characters
-function sanitizeInput(str: string): string {
-  return str
-    .replace(/[<>'"&]/g, '')
-    .replace(/[\x00-\x1F\x7F]/g, '')
-    .trim();
-}
-
-const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$/;
-const PHONE_REGEX = /^\+?[0-9]{10,14}$/;
+import { investorLeadSchema, waitlistLeadSchema } from '@/lib/validations';
 
 export async function captureInvestor(formData: FormData) {
   const reqHeaders = await headers();
@@ -26,18 +16,16 @@ export async function captureInvestor(formData: FormData) {
   }
 
   const rawEmail = formData.get('email');
-  if (!rawEmail || typeof rawEmail !== 'string') {
-    return { error: 'Valid email address is required.' };
+  const parseResult = investorLeadSchema.safeParse({ email: rawEmail });
+
+  if (!parseResult.success) {
+    return { error: parseResult.error.issues[0]?.message || 'Please provide a valid email address.' };
   }
 
-  const cleanEmail = sanitizeInput(rawEmail).toLowerCase();
-
-  if (cleanEmail.length < 5 || cleanEmail.length > 120 || !EMAIL_REGEX.test(cleanEmail)) {
-    return { error: 'Please provide a valid email address.' };
-  }
+  const { email } = parseResult.data;
 
   try {
-    db.addInvestor(cleanEmail);
+    db.addInvestor(email);
     return { success: true };
   } catch (err) {
     console.error('[DATABASE ERROR in captureInvestor]:', err);
@@ -56,20 +44,18 @@ export async function captureWaitlist(formData: FormData) {
   }
 
   const rawPhone = formData.get('phone');
-  if (!rawPhone || typeof rawPhone !== 'string') {
-    return { error: 'Valid mobile number is required.' };
+  const parseResult = waitlistLeadSchema.safeParse({ phone: rawPhone });
+
+  if (!parseResult.success) {
+    return {
+      error: parseResult.error.issues[0]?.message || 'Please enter a valid 10 to 14 digit mobile number.',
+    };
   }
 
-  // Normalize: remove dashes, spaces, parentheses
-  const normalizedPhone = rawPhone.replace(/[\s\-()]/g, '').trim();
-  const cleanPhone = sanitizeInput(normalizedPhone);
-
-  if (cleanPhone.length < 10 || cleanPhone.length > 15 || !PHONE_REGEX.test(cleanPhone)) {
-    return { error: 'Please enter a valid 10 to 12 digit mobile number.' };
-  }
+  const { phone } = parseResult.data;
 
   try {
-    db.addWaitlist(cleanPhone);
+    db.addWaitlist(phone);
     return { success: true };
   } catch (err) {
     console.error('[DATABASE ERROR in captureWaitlist]:', err);
