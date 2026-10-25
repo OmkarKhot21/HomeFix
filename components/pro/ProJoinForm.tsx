@@ -82,6 +82,12 @@ export default function ProJoinForm({
       >
         {saving && <Loader2 size={18} className="animate-spin" />} Submit application
       </button>
+      <p className="text-center text-xs leading-5 text-white/60">
+        By applying, you agree to our{' '}
+        <a href="/terms#professional" target="_blank" className="font-semibold text-white/85 underline hover:text-white">Terms of Service</a> and{' '}
+        <a href="/privacy" target="_blank" className="font-semibold text-white/85 underline hover:text-white">Privacy Policy</a>, including sharing
+        your live location while you are online.
+      </p>
     </form>
   );
 }

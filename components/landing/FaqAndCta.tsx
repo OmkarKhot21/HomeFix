@@ -26,7 +26,7 @@ const FAQS = [
   },
   {
     q: 'Are your professionals verified?',
-    a: 'Yes. Each partner completes an identity check, police verification and a skill check before they can go online, and is rated after every job.',
+    a: 'Yes. Each partner completes an identity check, police verification and a skill check before they can go online.',
   },
   {
     q: 'Can I schedule a visit for later?',

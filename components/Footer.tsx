@@ -81,6 +81,10 @@ export default function Footer({ onOpenInvestor }: { onOpenInvestor?: () => void
 
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-neutral-500">
           <p>&copy; {new Date().getFullYear()} HomeFix Technologies Pvt. Ltd. All rights reserved.</p>
+          <nav aria-label="Legal" className="flex items-center gap-5">
+            <Link href="/privacy" className="hover:text-neutral-300 transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-neutral-300 transition-colors">Terms of Service</Link>
+          </nav>
           <p className="text-neutral-500 font-medium">Fixing Homes, Improving Lives.</p>
         </div>
       </div>

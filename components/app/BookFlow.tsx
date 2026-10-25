@@ -401,6 +401,12 @@ export default function BookFlow({
             {submitting && <Loader2 size={18} className="animate-spin" />}
             {submitting ? 'Booking…' : 'Book'}
           </button>
+          <p className="mt-3 text-center text-xs text-neutral-500">
+            By booking, you agree to our{' '}
+            <a href="/terms" target="_blank" className="font-semibold text-neutral-700 underline hover:text-black">Terms</a>, including the{' '}
+            <a href="/terms#cancel" target="_blank" className="font-semibold text-neutral-700 underline hover:text-black">cancellation</a> and{' '}
+            <a href="/terms#warranty" target="_blank" className="font-semibold text-neutral-700 underline hover:text-black">warranty</a> rules.
+          </p>
         </section>
       </form>
 

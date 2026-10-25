@@ -290,6 +290,14 @@ export default function LoginClient({
                 </button>
               </form>
 
+              {mode !== 'reset' && (
+                <p className="mt-4 text-center text-xs leading-5 text-neutral-500">
+                  By continuing, you agree to our{' '}
+                  <a href="/terms" target="_blank" className="font-semibold text-neutral-700 underline hover:text-black">Terms of Service</a> and{' '}
+                  <a href="/privacy" target="_blank" className="font-semibold text-neutral-700 underline hover:text-black">Privacy Policy</a>.
+                </p>
+              )}
+
               <p className="mt-5 text-center text-sm text-neutral-600">
                 {mode === 'signin' && (
                   <>
