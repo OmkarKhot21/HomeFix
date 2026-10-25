@@ -4,7 +4,7 @@ const STEPS = [
   {
     icon: MousePointerClick,
     title: 'Pick the repair',
-    text: 'Choose from 10 common repairs with the price shown upfront. Add your address once — we remember it.',
+    text: 'Choose from 10 common repairs with the price shown upfront.',
     detail: 'Leaking tap · from ₹199',
   },
   {
@@ -28,7 +28,7 @@ export default function HowItWorks() {
         <div className="max-w-2xl">
           <p className="text-xs font-bold uppercase tracking-widest text-neutral-500">How it works</p>
           <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight text-neutral-900 sm:text-4xl">
-            From “it’s broken” to fixed, in three steps
+            From “it’s broken” to fixed in three steps
           </h2>
           <p className="mt-3 text-neutral-600">No calling around, no haggling, no waiting all day for someone who may not show up.</p>
         </div>

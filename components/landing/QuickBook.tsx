@@ -20,7 +20,7 @@ export default function QuickBook({ onSelect }: { onSelect: (service: Service) =
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-neutral-500">Book in one tap</p>
             <h2 id="quickbook-heading" className="mt-3 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
-              Pick a repair, we’ll handle the rest
+              Pick a repair and we’ll handle the rest
             </h2>
           </div>
           <div className="hidden gap-2 sm:flex">

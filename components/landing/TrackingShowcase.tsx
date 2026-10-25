@@ -47,14 +47,14 @@ export default function TrackingShowcase() {
             Know exactly when help arrives
           </h2>
           <p className="mt-3 max-w-lg text-neutral-600">
-            The moment a professional accepts your job, you see who’s coming, how far away they are, and a live arrival time —
-            just like tracking a food order.
+            The moment a professional accepts your job, you can see who’s coming, how far away they are and when they’ll
+            arrive — just like tracking a food order.
           </p>
           <ul className="mt-8 space-y-4">
             {[
               { icon: Navigation, title: 'Live location on the map', text: 'Updated every few seconds while they ride to you.' },
-              { icon: Clock, title: 'Arrival time you can plan around', text: 'No more “I’ll be there in 10 minutes” for an hour.' },
-              { icon: Phone, title: 'Call your pro in one tap', text: 'Share directions or gate codes before they reach.' },
+              { icon: Clock, title: 'Arrival time you can plan around', text: 'No more waiting an hour after hearing “I’ll be there in 10 minutes”.' },
+              { icon: Phone, title: 'Call your pro in one tap', text: 'Share directions or gate codes before they arrive.' },
             ].map(({ icon: Icon, title, text }) => (
               <li key={title} className="flex gap-4">
                 <span className="hf-glass-light flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-ink">

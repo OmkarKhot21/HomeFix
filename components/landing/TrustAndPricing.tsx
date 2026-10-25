@@ -4,7 +4,7 @@ const CHECKS = [
   { icon: Fingerprint, title: 'Identity check', text: 'Government ID verified against the person who shows up at your door.' },
   { icon: FileCheck2, title: 'Police verification', text: 'Background verification completed before a partner can go online.' },
   { icon: GraduationCap, title: 'Skill check', text: 'Every partner proves their trade skills before taking their first job.' },
-  { icon: Star, title: 'Rated after every job', text: 'Partners who fall below our standards are paused from the platform.' },
+  { icon: Star, title: 'Rated after every job', text: 'Partners who fall below our standards are suspended from the platform.' },
 ];
 
 const PROMISES = [

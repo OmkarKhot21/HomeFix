@@ -72,7 +72,7 @@ export default function Footer({ onOpenInvestor }: { onOpenInvestor?: () => void
                 <ShieldCheck size={16} className="text-brand" /> Police Verified
               </div>
               <p className="text-neutral-400 leading-relaxed">
-                All personnel carry verified ID badges and background clearance checks.
+                All professionals carry verified ID badges and have passed background checks.
               </p>
             </div>
           </div>

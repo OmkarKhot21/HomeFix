@@ -17,7 +17,7 @@ export function Coverage() {
             Built for the Mumbai Metropolitan Region
           </h2>
           <p className="mt-3 text-neutral-600">
-            We grow neighbourhood by neighbourhood so a professional is always close enough to reach you fast.
+            We grow neighbourhood by neighbourhood, so a professional is always close enough to reach you fast.
           </p>
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-3">

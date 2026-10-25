@@ -35,7 +35,7 @@ export default function Hero({ onSelect }: { onSelect?: (service: Service) => vo
               <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-600" />
             </span>
             Live in Mumbai, Thane &amp; Navi Mumbai
-            <span className="text-neutral-300">|</span>
+            <span className="hidden text-neutral-300 sm:inline">|</span>
             <span className="flex items-center gap-1 text-neutral-500">
               <Zap size={11} className="fill-brand text-brand-600" /> &lt; 15 min dispatch
             </span>
@@ -44,16 +44,16 @@ export default function Hero({ onSelect }: { onSelect?: (service: Service) => vo
           <h1 className="mt-6 text-5xl font-extrabold leading-[1.02] tracking-[-0.035em] text-ink [font-family:var(--font-headline)] sm:text-6xl lg:text-7xl">
             Home repairs,
             <br />
-            at your door in{' '}
+            at your doorstep in{' '}
             <span className="relative inline-block whitespace-nowrap">
-              <span className="relative z-10">20 minutes.</span>
+              <span className="relative z-10">15 minutes.</span>
               <span className="absolute inset-x-[-0.15em] bottom-[0.08em] z-0 h-[0.42em] -rotate-1 rounded-md bg-brand" aria-hidden="true" />
             </span>
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-neutral-600">
-            Book police-verified plumbers, electricians and carpenters in a few taps. Fixed prices, live tracking, and you pay
-            only after the job is done.
+            Book police-verified plumbers, electricians and carpenters in a few taps. Fixed prices, live tracking and
+            payment only after the job is done.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -127,8 +127,6 @@ export default function Hero({ onSelect }: { onSelect?: (service: Service) => vo
           <div className="absolute -bottom-5 right-8 flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-bold text-ink shadow-xl ring-1 ring-neutral-100">
             <ShieldCheck size={16} /> ID &amp; police verified
           </div>
-
-          <p className="relative z-10 mt-14 text-center text-[11px] font-medium text-neutral-800">Images are illustrative.</p>
         </div>
       </div>
     </section>

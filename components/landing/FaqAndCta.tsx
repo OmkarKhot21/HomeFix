@@ -9,7 +9,7 @@ import { ChevronDown, ArrowRight, PhoneCall } from 'lucide-react';
 const FAQS = [
   {
     q: 'How fast can a professional reach me?',
-    a: 'For “Right now” bookings we alert verified professionals near your address immediately. Once someone accepts, you see their live location and an arrival time on the tracking screen.',
+    a: 'For “Right now” bookings, we alert verified professionals near your address immediately. Once someone accepts, you see their live location and an arrival time on the tracking screen.',
   },
   {
     q: 'What does the visit charge include?',
@@ -30,7 +30,7 @@ const FAQS = [
   },
   {
     q: 'Can I schedule a visit for later?',
-    a: 'Yes. Choose “Schedule” while booking and pick a day in the next week and a time slot that suits you. Electrical work can also be booked at night, 8 PM – 12 AM.',
+    a: 'Yes. Choose “Schedule” while booking, then pick a day within the next week and a time slot that suits you. Electrical work can also be booked at night, between 8 PM and 12 AM.',
   },
 ];
 
