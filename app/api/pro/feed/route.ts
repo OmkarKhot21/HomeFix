@@ -7,6 +7,7 @@ import {
   getProEarnings,
   expireStaleBookings,
 } from '@/lib/liveDb';
+import { getRoute } from '@/lib/routing';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,13 @@ export async function GET() {
     const requests = pro.isOnline && !activeJob ? await listOpenRequestsForPro(pro) : [];
     const earnings = await getProEarnings(pro.uid);
 
+    // Road route to the customer while heading there.
+    let activeRoute = null;
+    if (activeJob && activeJob.status === 'accepted' && pro.lat !== null && pro.lng !== null) {
+      const r = await getRoute({ lat: pro.lat, lng: pro.lng }, { lat: activeJob.lat, lng: activeJob.lng });
+      activeRoute = { minutes: r.minutes, km: r.km, byRoad: r.source === 'road', path: r.path };
+    }
+
     return NextResponse.json(
       {
         pro: {
@@ -39,6 +47,7 @@ export async function GET() {
           lng: pro.lng,
         },
         activeJob,
+        activeRoute,
         requests,
         earnings,
         serverTime: new Date().toISOString(),

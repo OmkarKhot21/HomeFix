@@ -7,17 +7,8 @@ import AppMap, { type MapMarker } from '@/components/map/Map';
 import { cancelBooking } from '@/app/actions/customerActions';
 import { STATUS_META, formatDateTimeIST } from '@/lib/bookingStatus';
 import { formatKm } from '@/lib/geo';
-import type { CustomerBooking, JobStatus } from '@/lib/liveDb';
-
-type TrackingBooking = Omit<CustomerBooking, 'pro'> & {
-  pro: null | { name: string; phone: string; trade: string; experienceYears: number };
-};
-
-interface TrackingData {
-  booking: TrackingBooking;
-  proLocation: { lat: number; lng: number; updatedAt: string | null } | null;
-  eta: { minutes: number; km: number } | null;
-}
+import type { JobStatus } from '@/lib/liveDb';
+import type { TrackingPayload as TrackingData } from '@/lib/tracking';
 
 const STEPS: { key: JobStatus; label: string }[] = [
   { key: 'searching', label: 'Booking placed' },
@@ -107,6 +98,7 @@ export default function LiveTracking({ initial }: { initial: TrackingData }) {
               zoom={15}
               markers={markers}
               radar={b.status === 'searching' ? home : null}
+              route={data.route}
               line={data.proLocation ? [data.proLocation, home] : null}
               fitToMarkers={Boolean(data.proLocation)}
               interactive
@@ -125,7 +117,9 @@ export default function LiveTracking({ initial }: { initial: TrackingData }) {
           <p className="text-xs font-bold uppercase tracking-widest text-neutral-500">{b.service} · #{b.id}</p>
           <h1 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{headline}</h1>
           {b.status === 'accepted' && data.eta && (
-            <p className="mt-1 text-sm text-neutral-600">{formatKm(data.eta.km)} away · estimated from live location</p>
+            <p className="mt-1 text-sm text-neutral-600">
+              {formatKm(data.eta.km)} {data.eta.byRoad ? 'by road' : 'away'} · live location
+            </p>
           )}
           {b.status === 'searching' && (
             <p className="mt-1 text-sm text-neutral-600">

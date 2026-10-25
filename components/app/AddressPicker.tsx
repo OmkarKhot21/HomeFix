@@ -31,6 +31,8 @@ export default function AddressPicker({
   const [locating, setLocating] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+  const watchRef = useRef<number | null>(null);
   const line2Touched = useRef(false);
   const geocodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -53,51 +55,67 @@ export default function AddressPicker({
     }, 600);
   }, []);
 
+  // Tapping or dragging the pin: the customer chose the spot, so hide the GPS accuracy ring.
   const pick = useCallback(
     (p: LatLng) => {
       setPoint(p);
+      setAccuracy(null);
       reverseGeocode(p);
     },
     [reverseGeocode]
   );
 
-  const locateMe = useCallback(() => {
-    if (!navigator.geolocation) {
-      setError('Your browser cannot share location. Please drop the pin on the map.');
-      return;
-    }
-    setLocating(true);
-    setError('');
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
+  // GPS often starts rough (cell towers / Wi-Fi) and sharpens over a few seconds.
+  // Keep listening for up to 8 s and keep the most accurate fix; stop early once within 20 m.
+  const locate = useCallback(
+    (showErrors: boolean) => {
+      if (!navigator.geolocation) {
         setLocating(false);
-        pick({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      },
-      () => {
+        if (showErrors) setError('Your browser cannot share location. Please drop the pin on the map.');
+        return;
+      }
+      if (watchRef.current !== null) navigator.geolocation.clearWatch(watchRef.current);
+      setLocating(true);
+      setError('');
+      let best = Infinity;
+      const stop = () => {
+        if (watchRef.current !== null) navigator.geolocation.clearWatch(watchRef.current);
+        watchRef.current = null;
         setLocating(false);
-        setError('Location permission was denied. Drag the pin to your home instead.');
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  }, [pick]);
+      };
+      watchRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          const acc = pos.coords.accuracy;
+          if (acc < best) {
+            best = acc;
+            const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            setPoint(p);
+            setAccuracy(Math.round(acc));
+            reverseGeocode(p);
+          }
+          if (acc <= 20) stop();
+        },
+        () => {
+          stop();
+          if (showErrors) setError('Location permission was denied. Drag the pin to your home instead.');
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+      );
+      setTimeout(() => watchRef.current !== null && stop(), 8000);
+    },
+    [reverseGeocode]
+  );
 
   useEffect(() => {
-    // Try the device location once when the picker opens (state is only set in the callbacks).
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setLocating(false);
-          pick({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        },
-        () => setLocating(false),
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    } else {
-      setTimeout(() => setLocating(false), 0);
-    }
+    // Try the device location once when the picker opens (deferred so state isn't set during the effect).
+    const start = setTimeout(() => locate(false), 0);
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      clearTimeout(start);
+      window.removeEventListener('keydown', onKey);
+      if (watchRef.current !== null) navigator.geolocation.clearWatch(watchRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -128,10 +146,22 @@ export default function AddressPicker({
         </div>
 
         <div className="relative">
-          <AppMap center={point} zoom={17} markers={[{ id: 'pin', kind: 'pin', ...point }]} onPick={pick} className="h-64 w-full" />
+          <AppMap
+            center={point}
+            zoom={17}
+            markers={[{ id: 'pin', kind: 'pin', ...point }]}
+            accuracyM={accuracy}
+            onPick={pick}
+            className="h-64 w-full"
+          />
+          {accuracy !== null && !locating && (
+            <p className="pointer-events-none absolute left-3 top-12 z-[500] max-w-[calc(100%-1.5rem)] rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-semibold text-neutral-800 shadow ring-1 ring-neutral-200">
+              {accuracy <= 30 ? `Accurate to ~${accuracy} m` : `Rough location (±${accuracy} m), drag the pin to your door`}
+            </p>
+          )}
           <button
             type="button"
-            onClick={locateMe}
+            onClick={() => locate(true)}
             className="absolute bottom-3 right-3 z-[500] inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-xs font-bold text-neutral-900 shadow-lg ring-1 ring-neutral-200 hover:bg-neutral-50"
           >
             {locating ? <Loader2 size={15} className="animate-spin" /> : <LocateFixed size={15} />} Use current location

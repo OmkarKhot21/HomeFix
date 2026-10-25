@@ -24,6 +24,8 @@ import type { ActiveJob, JobRequest, EarningsSummary } from '@/lib/liveDb';
 export interface ProFeed {
   pro: { status: string; isOnline: boolean; hasLocation?: boolean; lat?: number | null; lng?: number | null };
   activeJob: ActiveJob | null;
+  /** Road route to the active job (from the server). */
+  activeRoute?: { minutes: number; km: number; byRoad: boolean; path: LatLng[] } | null;
   requests: JobRequest[];
   earnings: EarningsSummary;
 }
@@ -214,6 +216,11 @@ export default function ProDashboard({
               { id: 'home', kind: 'home', lat: job.lat, lng: job.lng },
               ...(me ? ([{ id: 'me', kind: 'pro', ...me }] as MapMarker[]) : []),
             ]}
+            route={
+              me && job.status === 'accepted' && feed.activeRoute && feed.activeRoute.path.length > 1
+                ? [me, ...feed.activeRoute.path, { lat: job.lat, lng: job.lng }]
+                : null
+            }
             line={me && job.status === 'accepted' ? [me, { lat: job.lat, lng: job.lng }] : null}
             fitToMarkers
             className="h-56 w-full"
@@ -229,7 +236,9 @@ export default function ProDashboard({
               </div>
               {me && job.status === 'accepted' && (
                 <span className="shrink-0 rounded-full bg-brand px-3 py-1.5 text-xs font-extrabold text-ink">
-                  {etaMinutes(me, job)} min · {formatKm(distanceKm(me, job))}
+                  {feed.activeRoute
+                    ? `${feed.activeRoute.minutes} min · ${formatKm(feed.activeRoute.km)}${feed.activeRoute.byRoad ? ' by road' : ''}`
+                    : `${etaMinutes(me, job)} min · ${formatKm(distanceKm(me, job))}`}
                 </span>
               )}
             </div>

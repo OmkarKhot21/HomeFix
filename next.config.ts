@@ -42,7 +42,10 @@ const securityHeaders = [
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
       // Firebase Auth APIs
-      "connect-src 'self' https://*.googleapis.com https://apis.google.com https://nominatim.openstreetmap.org",
+      // + OpenFreeMap map styles/tiles/fonts for the MapLibre map
+      "connect-src 'self' https://*.googleapis.com https://apis.google.com https://nominatim.openstreetmap.org https://tiles.openfreemap.org",
+      // MapLibre draws tiles in a background worker created from a blob URL
+      "worker-src 'self' blob:",
       // Firebase auth iframe (your-project.firebaseapp.com)
       "frame-src 'self' https://*.firebaseapp.com https://*.web.app",
       "frame-ancestors 'none'",

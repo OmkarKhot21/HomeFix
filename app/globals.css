@@ -184,7 +184,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hf-radar span, .hf-pro-marker { animation: none; }
 }
-.leaflet-container { font-family: inherit; }
+.hf-map .maplibregl-map, .hf-map .maplibregl-ctrl { font-family: inherit; }
 
 /* Service ticker on the landing page */
 .hf-marquee { animation: hf-marquee 40s linear infinite; }
