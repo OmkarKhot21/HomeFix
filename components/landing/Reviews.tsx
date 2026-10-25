@@ -41,7 +41,7 @@ function ReviewCard({ r, hidden }: { r: Review; hidden?: boolean }) {
           <Icon size={12} className="text-brand" /> {r.service}
         </span>
       </div>
-      <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-white/85">“{r.text}”</blockquote>
+      <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-white/85">{r.text}</blockquote>
       <figcaption className="mt-4 flex items-center gap-2.5">
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-600 text-[10px] font-extrabold text-ink">
           {initials(r.name)}
