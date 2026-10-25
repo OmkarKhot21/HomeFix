@@ -1,19 +1,19 @@
-import { Droplets, Zap } from 'lucide-react';
-import { REVIEWS, REVIEWS_ARE_SAMPLES, type Review } from '@/lib/reviews';
+import { Droplets, Zap, Hammer } from 'lucide-react';
+import { getServiceByName } from '@/lib/services';
+import type { PublicReview, ReviewSummary } from '@/lib/reviewsDb';
 
-// Customer reviews: frosted-glass cards drifting slowly right-to-left in a seamless loop.
-// The list is rendered twice and the track slides by exactly half its width, so the loop has no jump.
+// Real customer reviews (left after completed jobs) on frosted-glass cards.
+// 1–5 reviews sit still; 6 or more drift slowly right-to-left in a seamless loop
+// (the list is rendered twice and the track slides by exactly half its width).
+const DRIFT_FROM = 6;
 
 function Stars({ rating, showNumber = true }: { rating: number; showNumber?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-1.5" aria-label={`${rating} out of 5 stars`}>
+    <span className="inline-flex items-center gap-1.5" aria-label={`${rating.toFixed(1)} out of 5 stars`}>
       <span className="inline-flex gap-0.5" aria-hidden="true">
         {Array.from({ length: 5 }, (_, i) => (
-          <svg key={i} width="14" height="14" viewBox="0 0 24 24" className={i < rating ? 'text-brand' : 'text-white/20'}>
-            <path
-              fill="currentColor"
-              d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8L12 2.5z"
-            />
+          <svg key={i} width="14" height="14" viewBox="0 0 24 24" className={i < Math.round(rating) ? 'text-brand' : 'text-white/20'}>
+            <path fill="currentColor" d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8L12 2.5z" />
           </svg>
         ))}
       </span>
@@ -24,6 +24,7 @@ function Stars({ rating, showNumber = true }: { rating: number; showNumber?: boo
 
 function initials(name: string) {
   return name
+    .replace(/\./g, '')
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
@@ -31,14 +32,18 @@ function initials(name: string) {
     .join('');
 }
 
-function ReviewCard({ r, hidden }: { r: Review; hidden?: boolean }) {
-  const Icon = r.service === 'Plumbing' ? Droplets : Zap;
+function ReviewCard({ r, hidden, drifting }: { r: PublicReview; hidden?: boolean; drifting?: boolean }) {
+  const category = getServiceByName(r.service)?.category;
+  const Icon = category === 'Plumbing' ? Droplets : category === 'Electrical' ? Zap : Hammer;
   return (
-    <figure className="hf-review-card mr-5 flex h-[256px] w-[300px] shrink-0 flex-col rounded-3xl p-6 sm:w-[340px]" aria-hidden={hidden || undefined}>
+    <figure
+      className={`hf-review-card flex min-h-[256px] w-[300px] shrink-0 flex-col rounded-3xl p-6 sm:w-[340px] ${drifting ? 'mr-5' : ''}`}
+      aria-hidden={hidden || undefined}
+    >
       <div className="flex items-center justify-between gap-3">
         <Stars rating={r.rating} />
-        <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80 ring-1 ring-white/15">
-          <Icon size={12} className="text-brand" /> {r.service}
+        <span className="inline-flex max-w-[55%] items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80 ring-1 ring-white/15">
+          <Icon size={12} className="shrink-0 text-brand" /> <span className="truncate">{r.service}</span>
         </span>
       </div>
       <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed text-white/85">{r.text}</blockquote>
@@ -52,14 +57,18 @@ function ReviewCard({ r, hidden }: { r: Review; hidden?: boolean }) {
   );
 }
 
-export default function Reviews() {
-  const avg = REVIEWS.reduce((s, r) => s + r.rating, 0) / REVIEWS.length;
+export default function Reviews({ summary }: { summary: ReviewSummary | null }) {
+  // Nothing to show until customers have left written reviews.
+  if (!summary || summary.reviews.length === 0) return null;
+  const { reviews, average, count } = summary;
+  const drift = reviews.length >= DRIFT_FROM;
+
   return (
     <section id="reviews" aria-labelledby="reviews-heading" className="relative overflow-hidden bg-ink py-20 text-white">
       {/* Soft glows behind the glass */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <span className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-brand/30 blur-3xl" />
-        <span className="absolute left-1/3 bottom-0 h-64 w-96 rounded-full bg-brand-600/20 blur-3xl" />
+        <span className="absolute bottom-0 left-1/3 h-64 w-96 rounded-full bg-brand-600/20 blur-3xl" />
         <span className="absolute -right-20 top-1/4 h-80 w-80 rounded-full bg-sky-500/15 blur-3xl" />
       </div>
 
@@ -72,29 +81,37 @@ export default function Reviews() {
             </h2>
           </div>
           <div className="hf-review-card flex items-center gap-3 rounded-2xl px-5 py-3">
-            <span className="font-display text-3xl font-extrabold">{avg.toFixed(1)}</span>
+            <span className="font-display text-3xl font-extrabold">{average.toFixed(1)}</span>
             <span className="flex flex-col gap-1">
-              <Stars rating={Math.round(avg)} showNumber={false} />
-              <span className="text-[11px] text-white/60">{REVIEWS.length} reviews</span>
+              <Stars rating={average} showNumber={false} />
+              <span className="text-[11px] text-white/60">
+                {count} {count === 1 ? 'rating' : 'ratings'}
+              </span>
             </span>
           </div>
         </div>
-        {REVIEWS_ARE_SAMPLES && (
-          <p className="mt-3 inline-block rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/60">Sample reviews</p>
+
+        {!drift && (
+          <div className="mt-10 flex flex-wrap justify-center gap-5 sm:justify-start">
+            {reviews.map((r) => (
+              <ReviewCard key={r.id} r={r} />
+            ))}
+          </div>
         )}
       </div>
 
-      {/* Drifting row; fades out at both edges */}
-      <div className="hf-reviews-viewport relative mt-10">
-        <div className="hf-reviews-track flex w-max">
-          {REVIEWS.map((r) => (
-            <ReviewCard key={r.name} r={r} />
-          ))}
-          {REVIEWS.map((r) => (
-            <ReviewCard key={`${r.name}-copy`} r={r} hidden />
-          ))}
+      {drift && (
+        <div className="hf-reviews-viewport relative mt-10">
+          <div className="hf-reviews-track flex w-max">
+            {reviews.map((r) => (
+              <ReviewCard key={r.id} r={r} drifting />
+            ))}
+            {reviews.map((r) => (
+              <ReviewCard key={`${r.id}-copy`} r={r} hidden drifting />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

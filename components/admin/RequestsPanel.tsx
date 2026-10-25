@@ -3,6 +3,8 @@ import { listBookingsForAdmin, listProfessionalsForAdmin, getPlatformTotals, get
 import ProStatusButtons from './ProStatusButtons';
 import OrdersInsights from './OrdersInsights';
 import OrdersTable from './OrdersTable';
+import ReviewVisibilityButton from './ReviewVisibilityButton';
+import { listReviewsForAdmin, type AdminReview } from '@/lib/reviewsDb';
 
 // Server-rendered operations panel for the admin dashboard: professionals to approve,
 // live and past jobs, platform earnings and callback requests.
@@ -35,7 +37,14 @@ export default async function RequestsPanel() {
     } catch (err) {
       console.error('[ADMIN] Could not load investor messages:', err);
     }
-    data = { bookings, pros, callbacks, totals, stats, investorMessages };
+    // Loaded separately so the panel still works before 006_reviews.sql is run.
+    let reviews: AdminReview[] | null = null;
+    try {
+      reviews = await listReviewsForAdmin();
+    } catch (err) {
+      console.error('[ADMIN] Could not load reviews:', err);
+    }
+    data = { bookings, pros, callbacks, totals, stats, investorMessages, reviews };
   } catch (err) {
     console.error('[ADMIN] Could not load operations data:', err);
     return (
@@ -104,6 +113,49 @@ export default async function RequestsPanel() {
       {/* Orders: charts + table */}
       <OrdersInsights stats={data.stats} />
       <OrdersTable orders={data.bookings} />
+
+      {/* Reviews */}
+      <div className={card}>
+        <h2 className="text-lg font-bold">
+          Reviews {data.reviews && <span className="text-zinc-500">({data.reviews.length})</span>}
+        </h2>
+        {data.reviews === null ? (
+          <p className="mt-3 text-sm text-zinc-400">
+            Run <code>db/migrations/006_reviews.sql</code> in the Neon SQL editor to start collecting reviews.
+          </p>
+        ) : data.reviews.length === 0 ? (
+          <p className="mt-3 text-sm text-zinc-400">No reviews yet. Customers can rate a job after it is completed.</p>
+        ) : (
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[860px]">
+              <thead>
+                <tr>
+                  <th className={th}>Rating</th>
+                  <th className={th}>Review</th>
+                  <th className={th}>Customer</th>
+                  <th className={th}>Service</th>
+                  <th className={th}>Professional</th>
+                  <th className={th}>Date</th>
+                  <th className={th}>On website</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800">
+                {data.reviews.map((r) => (
+                  <tr key={r.id} className={r.hidden ? 'opacity-50' : ''}>
+                    <td className={`${td} whitespace-nowrap font-bold text-brand`}>{'★'.repeat(r.rating)}<span className="text-zinc-700">{'★'.repeat(5 - r.rating)}</span></td>
+                    <td className={`${td} max-w-sm`}>{r.text || <span className="text-zinc-500">No comment</span>}</td>
+                    <td className={td}>{r.name}<span className="block text-xs text-zinc-500">Job #{r.bookingId}</span></td>
+                    <td className={td}>{r.service}</td>
+                    <td className={td}>{r.proName || '—'}</td>
+                    <td className={`${td} whitespace-nowrap`}>{formatIST(r.createdAt)}</td>
+                    <td className={td}><ReviewVisibilityButton id={r.id} hidden={r.hidden} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Investor messages */}
       <div className={card}>

@@ -18,8 +18,9 @@ import LeadCaptureModal from '@/components/LeadCaptureModal';
 import ServiceModal from '@/components/ServiceModal';
 import { useCurrentUser } from '@/components/useCurrentUser';
 import type { Service } from '@/lib/services';
+import type { ReviewSummary } from '@/lib/reviewsDb';
 
-export default function LandingPage() {
+export default function LandingPage({ reviews = null }: { reviews?: ReviewSummary | null }) {
   const [isInvestorModalOpen, setIsInvestorModalOpen] = useState(false);
   const [activeService, setActiveService] = useState<Service | null>(null);
   const { user } = useCurrentUser();
@@ -39,7 +40,7 @@ export default function LandingPage() {
         <WhyHomeFix />
         <Coverage />
         <ForProfessionals />
-        <Reviews />
+        <Reviews summary={reviews} />
         <Faq />
         <FinalCta />
         <Footer onOpenInvestor={() => setIsInvestorModalOpen(true)} />

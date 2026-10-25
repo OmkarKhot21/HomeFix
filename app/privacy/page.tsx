@@ -40,6 +40,7 @@ export default function PrivacyPage() {
                 <li>Your device location, only when you allow it, to find your address.</li>
                 <li>Booking details: the service, your description of the problem, date and time, and its status.</li>
                 <li>Job records: the amount charged and how you paid (cash, UPI or card). We never collect card numbers, UPI PINs or bank details.</li>
+                <li>Reviews you choose to leave after a job: your star rating and comment.</li>
               </ul>
               <p><strong>If you work with us (professionals):</strong></p>
               <ul>
@@ -88,6 +89,10 @@ export default function PrivacyPage() {
                   Upstash (security and rate limiting, using your IP address), OpenStreetMap’s Nominatim service (turning a map pin into an address),
                   OSRM (road routes and travel times) and OpenFreeMap (map images). When a professional taps “Navigate”, Google Maps opens with your
                   address as the destination.
+                </li>
+                <li>
+                  <strong>Everyone visiting our website</strong> can see reviews you choose to leave, shown with your first name and the initial of your
+                  last name (for example “Priya S.”), the service and your rating. You can ask us to remove your review at any time.
                 </li>
                 <li><strong>Authorities</strong>, when the law requires it or to protect someone’s safety.</li>
               </ul>

@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { getSessionUser, createUserSession } from '@/lib/userAuth';
 import { checkRateLimit } from '@/lib/rateLimit';
-import { addressSchema, profileSchema, liveBookingSchema, bookingSchema } from '@/lib/validations';
+import { addressSchema, profileSchema, liveBookingSchema, bookingSchema, reviewSchema } from '@/lib/validations';
+import { createReview } from '@/lib/reviewsDb';
 import { getService } from '@/lib/services';
 import { NIGHT_SLOT, canBookNightSlot, quotePrice } from '@/lib/pricing';
 import {
@@ -176,5 +177,32 @@ export async function cancelBooking(id: string): Promise<{ ok: true } | Fail> {
   } catch (err) {
     console.error('[DATABASE ERROR in cancelBooking]:', err);
     return { ok: false, error: 'Could not cancel. Please try again.' };
+  }
+}
+
+/** Rate a completed booking (once). Shown on the home page under first name + last initial. */
+export async function submitReview(
+  bookingId: string,
+  input: { rating: number; comment?: string }
+): Promise<{ ok: true } | Fail> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: 'Please log in again.' };
+  if (!/^\d{1,18}$/.test(String(bookingId))) return { ok: false, error: 'Invalid booking.' };
+  const parsed = reviewSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message || 'Please check your review.' };
+
+  const limit = await checkRateLimit(`review:${user.uid}`, 10, 60 * 60 * 1000);
+  if (!limit.allowed) return { ok: false, error: 'Too many attempts. Please try again later.' };
+
+  try {
+    const result = await createReview(user.uid, bookingId, parsed.data.rating, parsed.data.comment);
+    if (result === 'not_allowed') return { ok: false, error: 'You can review a booking once it is completed.' };
+    if (result === 'already_reviewed') return { ok: false, error: 'You have already reviewed this booking.' };
+    revalidatePath('/');
+    revalidatePath(`/app/bookings/${bookingId}`);
+    return { ok: true };
+  } catch (err) {
+    console.error('[DATABASE ERROR in submitReview]:', err);
+    return { ok: false, error: 'Could not save your review. Please try again.' };
   }
 }

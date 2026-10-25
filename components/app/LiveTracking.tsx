@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Phone, Check, X, Loader2, ShieldCheck, Star, MapPin, ArrowLeft, RefreshCw } from 'lucide-react';
 import AppMap, { type MapMarker } from '@/components/map/Map';
 import { cancelBooking } from '@/app/actions/customerActions';
@@ -9,6 +10,8 @@ import { STATUS_META, formatDateTimeIST } from '@/lib/bookingStatus';
 import { formatKm } from '@/lib/geo';
 import type { JobStatus } from '@/lib/liveDb';
 import type { TrackingPayload as TrackingData } from '@/lib/tracking';
+import type { BookingReview } from '@/lib/reviewsDb';
+import RateService from './RateService';
 
 const STEPS: { key: JobStatus; label: string }[] = [
   { key: 'searching', label: 'Booking placed' },
@@ -22,15 +25,32 @@ const POLL_MS = 4000;
 
 const TRADE_LABEL: Record<string, string> = { plumber: 'Plumber', electrician: 'Electrician', carpenter: 'Carpenter' };
 
-export default function LiveTracking({ initial }: { initial: TrackingData }) {
+export default function LiveTracking({
+  initial,
+  review = null,
+}: {
+  initial: TrackingData;
+  /** Set for completed bookings when reviews are available. */
+  review?: { existing: BookingReview | null; publicName: string } | null;
+}) {
   const [data, setData] = useState<TrackingData>(initial);
   const [cancelling, setCancelling] = useState(false);
   const [error, setError] = useState('');
   const [stale, setStale] = useState(false);
   const failures = useRef(0);
+  const router = useRouter();
+  const refreshedForReview = useRef(false);
 
   const b = data.booking;
   const isLive = ['searching', 'accepted', 'arrived', 'in_progress'].includes(b.status);
+
+  // Job just finished while watching: reload server data once so the review card appears.
+  useEffect(() => {
+    if (b.status === 'completed' && !review && !refreshedForReview.current) {
+      refreshedForReview.current = true;
+      router.refresh();
+    }
+  }, [b.status, review, router]);
 
   const refresh = useCallback(async () => {
     try {
@@ -203,6 +223,10 @@ export default function LiveTracking({ initial }: { initial: TrackingData }) {
         </div>
         {b.notes && <p className="border-t border-neutral-100 px-5 py-4 text-sm text-neutral-600 sm:px-6">“{b.notes}”</p>}
       </div>
+
+      {b.status === 'completed' && review && (
+        <RateService bookingId={b.id} publicName={review.publicName} existing={review.existing} />
+      )}
 
       {error && <p role="alert" className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</p>}
 

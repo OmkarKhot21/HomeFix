@@ -150,6 +150,10 @@ export default function TermsPage() {
               <li>Make fake bookings, use someone else’s phone number without permission, or give a false address.</li>
               <li>Arrange to take bookings found on {LEGAL.brand} off the platform to avoid commission.</li>
               <li>Try to break, overload, copy or misuse the website, app or other people’s data.</li>
+              <li>
+                Post reviews that are false, abusive, or include someone’s personal details. Reviews can only be left for completed bookings, and we may
+                hide reviews that break these rules. We do not hide honest reviews because they are negative.
+              </li>
             </ul>
           ),
         },

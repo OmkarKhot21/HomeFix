@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getSessionUser } from '@/lib/userAuth';
 import { getProfessional } from '@/lib/liveDb';
+import { getPublicReviews, type ReviewSummary } from '@/lib/reviewsDb';
 import LandingPage from '@/components/LandingPage';
 
 export const dynamic = 'force-dynamic';
@@ -18,5 +19,14 @@ export default async function Home() {
     }
     redirect(isPro ? '/pro' : '/app');
   }
-  return <LandingPage />;
+
+  // Real customer reviews; the section stays hidden if there are none (or the table isn't set up yet).
+  let reviews: ReviewSummary | null = null;
+  try {
+    reviews = await getPublicReviews(30);
+  } catch (err) {
+    console.error('[REVIEWS] not available (run db/migrations/006_reviews.sql):', err);
+  }
+
+  return <LandingPage reviews={reviews} />;
 }

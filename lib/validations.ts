@@ -180,3 +180,15 @@ export const investorMessageSchema = investorLeadSchema.extend({
     .min(10, 'Please write a short message (at least 10 characters).')
     .max(2000, 'Message is too long (2000 characters max).'),
 });
+
+// ===== Reviews =====
+
+export const reviewSchema = z.object({
+  rating: z.coerce.number().int().min(1, 'Please choose a star rating.').max(5, 'Please choose a star rating.'),
+  comment: z
+    .string()
+    .trim()
+    .max(400, 'Please keep your review under 400 characters.')
+    .optional()
+    .transform((v) => (v ? v : null)),
+});
