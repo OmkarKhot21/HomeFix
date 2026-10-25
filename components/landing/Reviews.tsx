@@ -3,9 +3,11 @@ import { getServiceByName } from '@/lib/services';
 import type { PublicReview, ReviewSummary } from '@/lib/reviewsDb';
 
 // Real customer reviews (left after completed jobs) on frosted-glass cards.
-// 1–5 reviews sit still; 6 or more drift slowly right-to-left in a seamless loop
-// (the list is rendered twice and the track slides by exactly half its width).
-const DRIFT_FROM = 6;
+// A single review sits still; 2 or more drift slowly right-to-left in a seamless loop on every
+// screen size (the loop is rendered twice and the track slides by exactly half its width).
+const DRIFT_FROM = 2;
+const MIN_CARDS_PER_LOOP = 8; // 8 cards × ~360px is wider than any screen
+const SECONDS_PER_CARD = 7;
 
 function Stars({ rating, showNumber = true }: { rating: number; showNumber?: boolean }) {
   return (
@@ -62,6 +64,11 @@ export default function Reviews({ summary }: { summary: ReviewSummary | null }) 
   if (!summary || summary.reviews.length === 0) return null;
   const { reviews, average, count } = summary;
   const drift = reviews.length >= DRIFT_FROM;
+  // With only a few reviews, repeat them so one loop is wide enough to fill any screen without gaps.
+  const repeats = Math.max(1, Math.ceil(MIN_CARDS_PER_LOOP / reviews.length));
+  const loop = Array.from({ length: repeats }, (_, k) => reviews.map((r) => ({ r, key: `${r.id}-${k}`, copy: k > 0 }))).flat();
+  // Keep the same reading speed whatever the number of cards (about 7 s per card).
+  const duration = `${loop.length * SECONDS_PER_CARD}s`;
 
   return (
     <section id="reviews" aria-labelledby="reviews-heading" className="relative overflow-hidden bg-ink py-20 text-white">
@@ -102,12 +109,12 @@ export default function Reviews({ summary }: { summary: ReviewSummary | null }) 
 
       {drift && (
         <div className="hf-reviews-viewport relative mt-10">
-          <div className="hf-reviews-track flex w-max">
-            {reviews.map((r) => (
-              <ReviewCard key={r.id} r={r} drifting />
+          <div className="hf-reviews-track flex w-max" style={{ animationDuration: duration }}>
+            {loop.map(({ r, key, copy }) => (
+              <ReviewCard key={key} r={r} hidden={copy} drifting />
             ))}
-            {reviews.map((r) => (
-              <ReviewCard key={`${r.id}-copy`} r={r} hidden drifting />
+            {loop.map(({ r, key }) => (
+              <ReviewCard key={`${key}-b`} r={r} hidden drifting />
             ))}
           </div>
         </div>
