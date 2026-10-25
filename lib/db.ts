@@ -22,7 +22,7 @@ interface RawLeadRow {
   created_at: string | Date;
 }
 
-function getSql() {
+export function getSql() {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error('DATABASE_URL environment variable is missing.');
@@ -101,30 +101,6 @@ export const db = {
 
 // ===== App flow: customers, bookings, partners, callbacks (db/migrations/002_app_flow.sql) =====
 
-export interface BookingRow {
-  id: string;
-  service: string;
-  contact_phone: string;
-  address: string;
-  preferred_date: string;
-  preferred_slot: string;
-  notes: string | null;
-  status: string;
-  created_at: string;
-  customer_name: string | null;
-  customer_email: string | null;
-}
-
-export interface PartnerRow {
-  id: string;
-  name: string;
-  phone: string;
-  trade: string;
-  area: string;
-  experience_years: number;
-  created_at: string;
-}
-
 export interface CallbackRow {
   id: string;
   phone: string;
@@ -148,66 +124,36 @@ export async function upsertUser(user: {
       last_login_at = now()`;
 }
 
-export async function createBooking(b: {
-  uid: string;
-  service: string;
-  contactPhone: string;
-  address: string;
-  preferredDate: string;
-  preferredSlot: string;
-  notes: string | null;
-}): Promise<string> {
-  const sql = getSql();
-  const rows = (await sql`
-    insert into bookings (uid, service, contact_phone, address, preferred_date, preferred_slot, notes)
-    values (${b.uid}, ${b.service}, ${b.contactPhone}, ${b.address}, ${b.preferredDate}, ${b.preferredSlot}, ${b.notes})
-    returning id`) as { id: string | number }[];
-  return String(rows[0].id);
-}
-
-export async function upsertPartnerApplication(p: {
-  uid: string;
-  name: string;
-  phone: string;
-  trade: string;
-  area: string;
-  experienceYears: number;
-}): Promise<void> {
-  const sql = getSql();
-  await sql`
-    insert into partner_applications (uid, name, phone, trade, area, experience_years)
-    values (${p.uid}, ${p.name}, ${p.phone}, ${p.trade}, ${p.area}, ${p.experienceYears})
-    on conflict (uid) do update set
-      name = excluded.name, phone = excluded.phone, trade = excluded.trade,
-      area = excluded.area, experience_years = excluded.experience_years`;
-}
-
 export async function addCallbackRequest(phone: string): Promise<void> {
   const sql = getSql();
   await sql`insert into callback_requests (phone) values (${phone})`;
-}
-
-export async function getRecentBookings(limit = 50): Promise<BookingRow[]> {
-  const sql = getSql();
-  const rows = (await sql`
-    select b.id, b.service, b.contact_phone, b.address, b.preferred_date::text as preferred_date,
-           b.preferred_slot, b.notes, b.status, b.created_at, u.name as customer_name, u.email as customer_email
-    from bookings b join users u on u.uid = b.uid
-    order by b.created_at desc limit ${limit}`) as BookingRow[];
-  return rows.map((r) => ({ ...r, id: String(r.id), created_at: new Date(r.created_at).toISOString() }));
-}
-
-export async function getRecentPartners(limit = 50): Promise<PartnerRow[]> {
-  const sql = getSql();
-  const rows = (await sql`
-    select id, name, phone, trade, area, experience_years, created_at
-    from partner_applications order by created_at desc limit ${limit}`) as PartnerRow[];
-  return rows.map((r) => ({ ...r, id: String(r.id), created_at: new Date(r.created_at).toISOString() }));
 }
 
 export async function getRecentCallbacks(limit = 50): Promise<CallbackRow[]> {
   const sql = getSql();
   const rows = (await sql`
     select id, phone, created_at from callback_requests order by created_at desc limit ${limit}`) as CallbackRow[];
+  return rows.map((r) => ({ ...r, id: String(r.id), created_at: new Date(r.created_at).toISOString() }));
+}
+
+// ===== Investor messages (db/migrations/004_investor_messages.sql) =====
+
+export interface InvestorMessageRow {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  created_at: string;
+}
+
+export async function addInvestorMessage(m: { name: string; email: string; message: string }): Promise<void> {
+  const sql = getSql();
+  await sql`insert into investor_messages (name, email, message) values (${m.name}, ${m.email}, ${m.message})`;
+}
+
+export async function getRecentInvestorMessages(limit = 50): Promise<InvestorMessageRow[]> {
+  const sql = getSql();
+  const rows = (await sql`
+    select id, name, email, message, created_at from investor_messages order by created_at desc limit ${limit}`) as InvestorMessageRow[];
   return rows.map((r) => ({ ...r, id: String(r.id), created_at: new Date(r.created_at).toISOString() }));
 }

@@ -19,7 +19,7 @@ const securityHeaders = [
   // Disable dangerous browser features
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+    value: "camera=(), microphone=(), geolocation=(self), browsing-topics=()",
   },
   // XSS protection for legacy browsers
   {
@@ -42,7 +42,7 @@ const securityHeaders = [
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
       // Firebase Auth APIs
-      "connect-src 'self' https://*.googleapis.com https://apis.google.com",
+      "connect-src 'self' https://*.googleapis.com https://apis.google.com https://nominatim.openstreetmap.org",
       // Firebase auth iframe (your-project.firebaseapp.com)
       "frame-src 'self' https://*.firebaseapp.com https://*.web.app",
       "frame-ancestors 'none'",

@@ -3,15 +3,15 @@
 import { headers } from 'next/headers';
 import { db } from '@/lib/db';
 import { checkRateLimit, extractClientIp } from '@/lib/rateLimit';
-import { investorLeadSchema, waitlistLeadSchema, callbackSchema } from '@/lib/validations';
-import { addCallbackRequest } from '@/lib/db';
+import { investorMessageSchema, waitlistLeadSchema, callbackSchema } from '@/lib/validations';
+import { addCallbackRequest, addInvestorMessage } from '@/lib/db';
 
 export async function captureInvestor(formData: FormData) {
   const reqHeaders = await headers();
   const clientIp = extractClientIp(reqHeaders);
 
-  // Rate Limiting: Max 10 submissions per 5 minutes per IP
-  const rateLimit = await checkRateLimit(`lead_inv:${clientIp}`, 10, 5 * 60 * 1000);
+  // Rate Limiting: Max 5 investor messages per 10 minutes per IP
+  const rateLimit = await checkRateLimit(`lead_inv:${clientIp}`, 5, 10 * 60 * 1000);
   if (!rateLimit.allowed) {
     return { error: 'Too many requests. Please try again in a few minutes.' };
   }
@@ -22,16 +22,21 @@ export async function captureInvestor(formData: FormData) {
     return { success: true };
   }
 
-  const rawEmail = formData.get('email');
-  const parseResult = investorLeadSchema.safeParse({ email: rawEmail });
+  const parseResult = investorMessageSchema.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    message: formData.get('message'),
+  });
 
   if (!parseResult.success) {
-    return { error: parseResult.error.issues[0]?.message || 'Please provide a valid email address.' };
+    return { error: parseResult.error.issues[0]?.message || 'Please check your details.' };
   }
 
-  const { email } = parseResult.data;
+  const { name, email, message } = parseResult.data;
 
   try {
+    // Save the full message, and keep the email in the leads list as before.
+    await addInvestorMessage({ name, email, message });
     await db.addInvestor(email);
     return { success: true };
   } catch (err) {

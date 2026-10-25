@@ -17,7 +17,7 @@
 Traditional home service discovery in urban India suffers from fragmented local vendors, unpredictable surge pricing, delayed response times (hours/days), lack of verified trust, and absent warranties. HomeFix transforms urban maintenance into a quick-commerce experience:
 - **15-Minute Guaranteed Dispatch SLA**: Auto-matched nearby police-verified technicians.
 - **Upfront Standardized Rate Cards**: Base inspections starting at ₹199 with transparent pricing.
-- **30-Day Workmanship Warranty**: Guaranteed after-service protection.
+- **7-Day Workmanship Warranty**: Guaranteed after-service protection.
 - **Real-Time Technician Tracking**: Live ETA and technician dispatch verification.
 
 ---

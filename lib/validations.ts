@@ -67,6 +67,7 @@ export const BOOKING_SLOTS = [
   'Morning (8 AM – 12 PM)',
   'Afternoon (12 – 4 PM)',
   'Evening (4 – 8 PM)',
+  'Night (8 PM – 12 AM)', // electrical only; must match NIGHT_SLOT in lib/pricing.ts
 ] as const;
 
 export const bookingSchema = z.object({
@@ -108,4 +109,70 @@ export const partnerSchema = z.object({
     .int('Use whole years.')
     .min(0, 'Experience cannot be negative.')
     .max(60, 'Please check your years of experience.'),
+});
+
+// ===== Live dispatch =====
+
+const latSchema = z.number().finite().min(-90).max(90);
+const lngSchema = z.number().finite().min(-180).max(180);
+
+export const addressSchema = z.object({
+  label: z.enum(['Home', 'Work', 'Other'], { message: 'Please choose a label.' }),
+  line1: z.string().trim().min(2, 'Please enter flat / house number and building.').max(150),
+  line2: z
+    .string()
+    .trim()
+    .max(200)
+    .optional()
+    .transform((v) => (v ? v : null)),
+  lat: latSchema,
+  lng: lngSchema,
+});
+
+export const profileSchema = z.object({
+  name: z.string().trim().min(2, 'Please enter your name.').max(80),
+  phone: indianMobile,
+});
+
+export const liveBookingSchema = z.object({
+  service: z.string().trim().min(1, 'Please choose a service.').max(60),
+  addressId: z.string().regex(/^\d{1,18}$/, 'Please choose an address.'),
+  phone: indianMobile, // number the professional should call
+  contactIsSelf: z.boolean(),
+  contactName: z
+    .string()
+    .trim()
+    .max(80, 'Name is too long.')
+    .optional()
+    .transform((v) => (v ? v : null)),
+  saveContact: z.boolean().optional(),
+  timing: z.enum(['asap', 'scheduled']),
+  preferredDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  preferredSlot: z.enum(BOOKING_SLOTS).optional(),
+  notes: z
+    .string()
+    .trim()
+    .max(500, 'Notes are too long.')
+    .optional()
+    .transform((v) => (v ? v : null)),
+});
+
+export const locationSchema = z.object({ lat: latSchema, lng: lngSchema });
+
+export const completeJobSchema = z.object({
+  amount: z.coerce
+    .number({ message: 'Please enter the amount collected.' })
+    .int('Use a whole rupee amount.')
+    .min(0, 'Amount cannot be negative.')
+    .max(200000, 'Please check the amount.'),
+});
+
+// ===== Investor messages =====
+export const investorMessageSchema = investorLeadSchema.extend({
+  name: z.string().trim().min(2, 'Please enter your name.').max(80, 'Name is too long.'),
+  message: z
+    .string()
+    .trim()
+    .min(10, 'Please write a short message (at least 10 characters).')
+    .max(2000, 'Message is too long (2000 characters max).'),
 });

@@ -31,7 +31,7 @@ export default function WaitlistDrawer({
       <div className="bg-white rounded-3xl p-8 w-full max-w-md relative border-2 border-black shadow-2xl">
         <button 
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-black transition-colors"
+          className="absolute top-5 right-5 text-neutral-400 hover:text-black transition-colors"
         >
           <X size={24} />
         </button>
@@ -41,13 +41,13 @@ export default function WaitlistDrawer({
             <Smartphone size={28} />
           </div>
           <h3 className="text-2xl font-extrabold font-display mb-2">Join HomeFix Waitlist</h3>
-          <p className="text-slate-600 text-sm mb-6">
+          <p className="text-neutral-600 text-sm mb-6">
             Get early access to our platform for zero-friction service booking in MMR.
           </p>
 
           {status === 'success' ? (
-            <div className="bg-emerald-50 text-emerald-800 p-6 rounded-2xl border border-emerald-200">
-              <CheckCircle2 size={32} className="mx-auto mb-3 text-emerald-600" />
+            <div className="bg-brand-50 text-neutral-900 p-6 rounded-2xl border border-brand/50">
+              <CheckCircle2 size={32} className="mx-auto mb-3 text-neutral-900" />
               <h4 className="font-bold mb-1">You&apos;re on the list!</h4>
               <p className="text-sm">We&apos;ll text you a download link as soon as we launch in your area.</p>
             </div>
@@ -62,8 +62,8 @@ export default function WaitlistDrawer({
                 className="absolute -left-[9999px] opacity-0 pointer-events-none" 
               />
               <div className="mb-4">
-                <div className="flex border-2 border-black rounded-xl overflow-hidden focus-within:ring-4 ring-slate-200 transition-all">
-                  <span className="bg-slate-50 px-4 py-3 font-bold text-slate-500 border-r border-slate-200">+91</span>
+                <div className="flex border-2 border-black rounded-xl overflow-hidden focus-within:ring-4 ring-neutral-200 transition-all">
+                  <span className="bg-neutral-50 px-4 py-3 font-bold text-neutral-500 border-r border-neutral-200">+91</span>
                   <input 
                     type="tel" 
                     name="phone"
@@ -78,7 +78,7 @@ export default function WaitlistDrawer({
               <button 
                 type="submit" 
                 disabled={status === 'loading'}
-                className="w-full bg-black text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all"
+                className="w-full bg-black text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-neutral-800 transition-all"
               >
                 {status === 'loading' ? <Loader2 className="animate-spin" /> : 'Join Waitlist via SMS'}
               </button>

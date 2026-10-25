@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { X, Check, Clock, ShieldCheck, LogIn, ArrowRight } from 'lucide-react';
 import { servicePhotoUrl, type Service } from '@/lib/services';
+import { useNightNow } from '@/components/useNightNow';
 
 // Popup shown when a visitor picks a service: a photo of a professional at work,
 // what they will do, the starting price, and a pulsing "Login to book" box.
@@ -18,6 +19,7 @@ export default function ServiceModal({
   onClose: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const nightNow = useNightNow();
 
   useEffect(() => {
     if (!service) return;
@@ -36,7 +38,7 @@ export default function ServiceModal({
 
   if (!service) return null;
 
-  const bookHref = `/book?service=${service.slug}`;
+  const bookHref = `/app/book?service=${service.slug}`;
   const ctaHref = isLoggedIn ? bookHref : `/login?service=${service.slug}`;
 
   return (
@@ -49,7 +51,7 @@ export default function ServiceModal({
         aria-modal="true"
         aria-labelledby="service-modal-title"
         onClick={(e) => e.stopPropagation()}
-        className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto overflow-x-hidden rounded-t-3xl bg-slate-950 text-white shadow-2xl sm:rounded-3xl"
+        className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto overflow-x-hidden rounded-t-3xl bg-neutral-950 text-white shadow-2xl sm:rounded-3xl"
       >
         {/* Photo background */}
         <div className="relative h-72 sm:h-80">
@@ -62,7 +64,7 @@ export default function ServiceModal({
             style={{ objectPosition: service.photoPosition ?? 'center 30%' }}
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
 
           <button
             ref={closeRef}
@@ -76,7 +78,7 @@ export default function ServiceModal({
 
           <div className="absolute bottom-0 left-0 right-0 p-6">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold backdrop-blur">
-              <ShieldCheck size={13} className="text-emerald-400" /> Verified {service.category.toLowerCase()} professional
+              <ShieldCheck size={13} className="text-brand" /> Verified {service.category.toLowerCase()} professional
             </span>
             <h2 id="service-modal-title" className="mt-3 font-display text-3xl font-extrabold tracking-tight">
               {service.name}
@@ -91,7 +93,7 @@ export default function ServiceModal({
           <ul className="mt-3 space-y-2.5">
             {service.tasks.map((task) => (
               <li key={task} className="flex items-start gap-2.5 text-sm text-white/85">
-                <Check size={16} className="mt-0.5 shrink-0 text-emerald-400" />
+                <Check size={16} className="mt-0.5 shrink-0 text-brand" />
                 {task}
               </li>
             ))}
@@ -106,14 +108,17 @@ export default function ServiceModal({
               <Clock size={15} /> {service.duration}
             </span>
           </div>
-          <p className="mt-2 text-xs text-white/45">Parts, if needed, are charged separately at fixed rates. 30-day warranty on work.</p>
+          <p className="mt-2 text-xs text-white/45">
+            Parts, if needed, are charged separately at fixed rates. 7-day warranty on work.
+            {nightNow && service.category !== 'Carpentry' && ' A ₹150 night charge applies right now (after 8 PM).'}
+          </p>
         </div>
 
         {/* Pulsing call to action in the corner */}
-        <div className="pointer-events-none sticky bottom-0 flex justify-end bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent px-5 pb-5 pt-8">
+        <div className="pointer-events-none sticky bottom-0 flex justify-end bg-gradient-to-t from-neutral-950 via-neutral-950/90 to-transparent px-5 pb-5 pt-8">
         <Link
           href={ctaHref}
-          className="hf-login-pulse pointer-events-auto inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-sm font-extrabold text-slate-950 transition hover:bg-slate-100"
+          className="hf-login-pulse pointer-events-auto inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-sm font-extrabold text-neutral-950 transition hover:bg-neutral-100"
         >
           {isLoggedIn ? (
             <>

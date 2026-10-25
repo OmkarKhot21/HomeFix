@@ -39,7 +39,7 @@ export default function LeadCaptureModal({
         setStatus('success');
       } else {
         setStatus('idle');
-        setErrorMessage('error' in res && res.error ? res.error : 'Error capturing email.');
+        setErrorMessage('error' in res && res.error ? res.error : 'Could not send your message. Please try again.');
       }
     } catch {
       setStatus('idle');
@@ -51,12 +51,12 @@ export default function LeadCaptureModal({
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[2000] flex items-center justify-center p-4 animate-in fade-in">
-      <div className="bg-white rounded-3xl p-8 w-full max-w-md relative border-2 border-black shadow-2xl">
+      <div className="bg-white rounded-3xl p-8 w-full max-w-md relative border-2 border-black shadow-2xl max-h-[92dvh] overflow-y-auto">
         <button 
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-5 right-5 text-slate-400 hover:text-black transition-colors"
+          className="absolute top-5 right-5 text-neutral-400 hover:text-black transition-colors"
         >
           <X size={24} />
         </button>
@@ -65,16 +65,16 @@ export default function LeadCaptureModal({
           <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-5">
             <ChartLine size={28} />
           </div>
-          <h3 className="text-2xl font-extrabold font-display mb-2">HomeFix Investor Deck</h3>
-          <p className="text-slate-600 text-sm mb-6">
-            Access executive financial projections, unit economics, and MMR expansion playbooks.
+          <h3 className="text-2xl font-extrabold font-display mb-2">Write to the HomeFix team</h3>
+          <p className="text-neutral-600 text-sm mb-6">
+            Interested in investing in or partnering with HomeFix? Send us an email and our founders will get back to you.
           </p>
 
           {status === 'success' ? (
-            <div className="bg-emerald-50 text-emerald-800 p-6 rounded-2xl border border-emerald-200">
-              <CheckCircle2 size={32} className="mx-auto mb-3 text-emerald-600" />
-              <h4 className="font-bold mb-1">Success!</h4>
-              <p className="text-sm">Thanks! We&apos;ll email you the deck within 24 hours.</p>
+            <div className="bg-brand-50 text-neutral-900 p-6 rounded-2xl border border-brand/50">
+              <CheckCircle2 size={32} className="mx-auto mb-3 text-neutral-900" />
+              <h4 className="font-bold mb-1">Message sent!</h4>
+              <p className="text-sm">Thanks for writing to us. We&apos;ll reply to your email soon.</p>
             </div>
           ) : (
             <form action={handleSubmit} className="text-left relative">
@@ -87,18 +87,47 @@ export default function LeadCaptureModal({
                 className="absolute -left-[9999px] opacity-0 pointer-events-none" 
               />
               <div className="mb-4">
-                <label className="block text-sm font-bold text-slate-700 mb-2">Work Email</label>
-                <input 
-                  type="email" 
-                  name="email" 
+                <label htmlFor="inv-name" className="block text-sm font-bold text-neutral-700 mb-2">Your name</label>
+                <input
+                  id="inv-name"
+                  type="text"
+                  name="name"
+                  required
+                  maxLength={80}
+                  autoComplete="name"
+                  onChange={() => errorMessage && setErrorMessage('')}
+                  placeholder="Full name"
+                  className="w-full border-2 border-black rounded-xl px-4 py-3 focus:outline-none focus:ring-4 ring-neutral-200 transition-all"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="inv-email" className="block text-sm font-bold text-neutral-700 mb-2">Your email</label>
+                <input
+                  id="inv-email"
+                  type="email"
+                  name="email"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if (errorMessage) setErrorMessage('');
                   }}
                   required
-                  placeholder="partner@venturefund.com" 
-                  className="w-full border-2 border-black rounded-xl px-4 py-3 focus:outline-none focus:ring-4 ring-slate-200 transition-all font-body"
+                  autoComplete="email"
+                  placeholder="you@company.com"
+                  className="w-full border-2 border-black rounded-xl px-4 py-3 focus:outline-none focus:ring-4 ring-neutral-200 transition-all"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="inv-message" className="block text-sm font-bold text-neutral-700 mb-2">Message</label>
+                <textarea
+                  id="inv-message"
+                  name="message"
+                  required
+                  rows={4}
+                  maxLength={2000}
+                  onChange={() => errorMessage && setErrorMessage('')}
+                  placeholder="Tell us a little about yourself and what you'd like to discuss."
+                  className="w-full border-2 border-black rounded-xl px-4 py-3 focus:outline-none focus:ring-4 ring-neutral-200 transition-all"
                 />
                 {errorMessage && (
                   <p className="text-xs font-semibold text-red-600 mt-2">
@@ -106,20 +135,15 @@ export default function LeadCaptureModal({
                   </p>
                 )}
               </div>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={status === 'loading'}
-                className="w-full bg-black text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all"
+                className="w-full bg-black text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-neutral-800 transition-all"
               >
-                {status === 'loading' ? <Loader2 className="animate-spin" /> : 'Get Confidential Access'}
+                {status === 'loading' ? <Loader2 className="animate-spin" /> : 'Send email'}
               </button>
             </form>
           )}
-          
-          <div className="bg-slate-50 p-4 rounded-xl text-left text-xs text-slate-500 mt-6 border border-slate-200">
-            <p><strong>• Current Round:</strong> Seed Phase (Seeking ₹2.5 Cr)</p>
-            <p><strong>• Margins:</strong> 18.5% Net Contribution After CAC</p>
-          </div>
         </div>
       </div>
     </div>

@@ -47,3 +47,12 @@ create table if not exists callback_requests (
   created_at timestamptz not null default now()
 );
 create index if not exists callback_requests_created_at_idx on callback_requests (created_at desc);
+
+create table if not exists investor_messages (
+  id bigserial primary key,
+  name text not null,
+  email text not null,
+  message text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists investor_messages_created_at_idx on investor_messages (created_at desc);

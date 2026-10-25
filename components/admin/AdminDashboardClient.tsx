@@ -110,7 +110,7 @@ export default function AdminDashboardClient({
               </span>
             </Link>
             <div className="hidden sm:flex items-center gap-2 border-l border-zinc-800 pl-4 text-xs text-zinc-400 font-mono">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-brand animate-pulse"></span>
               Thane &bull; Mumbai &bull; Navi Mumbai
             </div>
           </div>
@@ -370,8 +370,8 @@ export default function AdminDashboardClient({
                           >
                             {isCopied ? (
                               <>
-                                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                                <span className="text-emerald-400 font-medium">Copied!</span>
+                                <Check className="w-3.5 h-3.5 text-brand" />
+                                <span className="text-brand font-medium">Copied!</span>
                               </>
                             ) : (
                               <>

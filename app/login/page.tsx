@@ -20,7 +20,7 @@ export default async function LoginPage({
   const user = await getSessionUser();
 
   // Already logged in and heading somewhere specific: skip the login screen.
-  if (user && service) redirect(`/book?service=${service.slug}`);
+  if (user && service) redirect(`/app/book?service=${service.slug}`);
   if (user && next) redirect(next);
 
   return (

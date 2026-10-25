@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { Bricolage_Grotesque, Inter } from "next/font/google";
 import "./globals.css";
-import DesignSwitcher from "@/components/DesignSwitcher";
+
+// Self-hosted by Next.js: no request to Google from the visitor's browser.
+const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", display: "swap" });
+const body = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
 export const metadata: Metadata = {
   title: "HomeFix | Fixing Homes, Improving Lives",
@@ -13,10 +17,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="antialiased">
         {children}
-        <DesignSwitcher />
       </body>
     </html>
   );

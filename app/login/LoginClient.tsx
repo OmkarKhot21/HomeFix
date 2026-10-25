@@ -50,7 +50,7 @@ function friendlyError(err: unknown): string | null {
 }
 
 const inputClass =
-  'mt-2 w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-900';
+  'mt-2 w-full rounded-xl border-2 border-neutral-200 bg-white px-4 py-3 text-sm font-medium text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-neutral-900';
 
 export default function LoginClient({
   serviceSlug,
@@ -92,7 +92,7 @@ export default function LoginClient({
     }
 
     if (serviceSlug) {
-      router.push(`/book?service=${serviceSlug}`);
+      router.push(`/app/book?service=${serviceSlug}`);
     } else if (nextPath) {
       router.push(nextPath);
     } else {
@@ -176,25 +176,25 @@ export default function LoginClient({
           : 'Log in to HomeFix';
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 sm:py-16">
+    <main className="min-h-screen bg-neutral-50 px-4 py-10 sm:py-16">
       <div className="mx-auto w-full max-w-md">
-        <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-black">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-600 hover:text-black">
           <ArrowLeft size={16} /> Back to HomeFix
         </Link>
 
-        <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
+        <div className="mt-6 rounded-3xl border border-neutral-200 bg-white p-6 shadow-xl sm:p-8">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-black font-display text-lg font-extrabold text-white">HF</span>
             <span className="font-display text-xl font-bold tracking-tight">HOMEFIX</span>
           </div>
 
-          <h1 className="mt-6 font-display text-2xl font-extrabold text-slate-900">{title}</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="mt-6 font-display text-2xl font-extrabold text-neutral-900">{title}</h1>
+          <p className="mt-1 text-sm text-neutral-600">
             {mode === 'reset' ? 'Enter your email and we’ll send you a reset link.' : 'Continue with Google or your email.'}
           </p>
 
           {!isFirebaseConfigured ? (
-            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <div className="mt-6 rounded-2xl border border-brand bg-brand-50 p-4 text-sm text-neutral-900">
               Login is being set up. Please check back soon, or request a callback from the home page.
             </div>
           ) : (
@@ -205,7 +205,7 @@ export default function LoginClient({
                     type="button"
                     onClick={handleGoogle}
                     disabled={busy !== null}
-                    className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl border-2 border-slate-200 bg-white py-3.5 text-sm font-bold text-slate-900 transition hover:border-slate-900 disabled:opacity-60"
+                    className="mt-6 flex w-full items-center justify-center gap-3 rounded-xl border-2 border-neutral-200 bg-white py-3.5 text-sm font-bold text-neutral-900 transition hover:border-neutral-900 disabled:opacity-60"
                   >
                     {busy === 'google' ? (
                       <Loader2 size={18} className="animate-spin" />
@@ -220,8 +220,8 @@ export default function LoginClient({
                     Continue with Google
                   </button>
 
-                  <div className="my-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
-                    <span className="h-px flex-1 bg-slate-200" /> or <span className="h-px flex-1 bg-slate-200" />
+                  <div className="my-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-widest text-neutral-400">
+                    <span className="h-px flex-1 bg-neutral-200" /> or <span className="h-px flex-1 bg-neutral-200" />
                   </div>
                 </>
               )}
@@ -229,7 +229,7 @@ export default function LoginClient({
               <form onSubmit={handleEmail} className={mode === 'reset' ? 'mt-6 space-y-4' : 'space-y-4'} noValidate>
                 {mode === 'signup' && (
                   <div>
-                    <label htmlFor="login-name" className="text-sm font-semibold text-slate-800">Your name</label>
+                    <label htmlFor="login-name" className="text-sm font-semibold text-neutral-800">Your name</label>
                     <input
                       id="login-name"
                       type="text"
@@ -244,7 +244,7 @@ export default function LoginClient({
                 )}
 
                 <div>
-                  <label htmlFor="login-email" className="text-sm font-semibold text-slate-800">Email</label>
+                  <label htmlFor="login-email" className="text-sm font-semibold text-neutral-800">Email</label>
                   <input
                     id="login-email"
                     type="email"
@@ -260,9 +260,9 @@ export default function LoginClient({
                 {mode !== 'reset' && (
                   <div>
                     <div className="flex items-center justify-between">
-                      <label htmlFor="login-password" className="text-sm font-semibold text-slate-800">Password</label>
+                      <label htmlFor="login-password" className="text-sm font-semibold text-neutral-800">Password</label>
                       {mode === 'signin' && (
-                        <button type="button" onClick={() => switchMode('reset')} className="text-xs font-semibold text-slate-600 hover:text-black">
+                        <button type="button" onClick={() => switchMode('reset')} className="text-xs font-semibold text-neutral-600 hover:text-black">
                           Forgot password?
                         </button>
                       )}
@@ -283,18 +283,18 @@ export default function LoginClient({
                 <button
                   type="submit"
                   disabled={busy !== null}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3.5 text-sm font-bold text-white transition hover:bg-black disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-neutral-900 py-3.5 text-sm font-bold text-white transition hover:bg-black disabled:opacity-60"
                 >
                   {busy === 'email' ? <Loader2 size={18} className="animate-spin" /> : <Mail size={16} />}
                   {mode === 'reset' ? 'Send reset link' : mode === 'signup' ? 'Create account' : 'Log in with email'}
                 </button>
               </form>
 
-              <p className="mt-5 text-center text-sm text-slate-600">
+              <p className="mt-5 text-center text-sm text-neutral-600">
                 {mode === 'signin' && (
                   <>
                     New to HomeFix?{' '}
-                    <button type="button" onClick={() => switchMode('signup')} className="font-bold text-slate-900 hover:underline">
+                    <button type="button" onClick={() => switchMode('signup')} className="font-bold text-neutral-900 hover:underline">
                       Create an account
                     </button>
                   </>
@@ -302,13 +302,13 @@ export default function LoginClient({
                 {mode === 'signup' && (
                   <>
                     Already have an account?{' '}
-                    <button type="button" onClick={() => switchMode('signin')} className="font-bold text-slate-900 hover:underline">
+                    <button type="button" onClick={() => switchMode('signin')} className="font-bold text-neutral-900 hover:underline">
                       Log in
                     </button>
                   </>
                 )}
                 {mode === 'reset' && (
-                  <button type="button" onClick={() => switchMode('signin')} className="font-bold text-slate-900 hover:underline">
+                  <button type="button" onClick={() => switchMode('signin')} className="font-bold text-neutral-900 hover:underline">
                     Back to log in
                   </button>
                 )}
@@ -322,12 +322,12 @@ export default function LoginClient({
             </p>
           )}
           {notice && (
-            <p role="status" className="mt-4 rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-medium text-emerald-800">
+            <p role="status" className="mt-4 rounded-xl bg-brand-50 px-3 py-2.5 text-sm font-medium text-neutral-900">
               {notice}
             </p>
           )}
 
-          <p className="mt-6 flex items-start gap-2 text-xs text-slate-500">
+          <p className="mt-6 flex items-start gap-2 text-xs text-neutral-500">
             <ShieldCheck size={14} className="mt-0.5 shrink-0" />
             We only use your email to manage your bookings. No spam.
           </p>
