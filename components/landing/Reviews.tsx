@@ -53,8 +53,6 @@ function ReviewCard({ r, hidden }: { r: Review; hidden?: boolean }) {
 }
 
 export default function Reviews() {
-  // Only real reviews go on the site: while the list holds placeholder examples, the section stays hidden.
-  if (REVIEWS_ARE_SAMPLES) return null;
   const avg = REVIEWS.reduce((s, r) => s + r.rating, 0) / REVIEWS.length;
   return (
     <section id="reviews" aria-labelledby="reviews-heading" className="relative overflow-hidden bg-ink py-20 text-white">
@@ -81,6 +79,9 @@ export default function Reviews() {
             </span>
           </div>
         </div>
+        {REVIEWS_ARE_SAMPLES && (
+          <p className="mt-3 inline-block rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/60">Sample reviews</p>
+        )}
       </div>
 
       {/* Drifting row; fades out at both edges */}

@@ -1,6 +1,6 @@
 // Reviews shown on the home page (above the FAQ).
-// While these are placeholder examples, keep REVIEWS_ARE_SAMPLES = true: the section stays hidden.
-// Replace them with real customer reviews and set it to false to show the section.
+// While these are placeholder examples, keep REVIEWS_ARE_SAMPLES = true so the section is labelled
+// "Sample reviews". Replace with real customer reviews and set it to false.
 export const REVIEWS_ARE_SAMPLES = true;
 
 export interface Review {
