@@ -37,6 +37,12 @@ export interface AppMapProps {
   fitToMarkers?: boolean;
   /** Address picking: tap the map or drag the pin. */
   onPick?: (p: LatLng) => void;
+  /** Fixed-centre-pin picking: called with the map centre after every move. `byUser` = the customer moved it. */
+  onCenterChange?: (p: LatLng, byUser: boolean) => void;
+  /** Called when the customer starts dragging or zooming the map. */
+  onMoveStart?: () => void;
+  /** Draw the accuracy ring around the map centre (for a fixed centre pin drawn outside the map). */
+  accuracyAtCenter?: boolean;
   interactive?: boolean;
   className?: string;
 }
@@ -93,6 +99,9 @@ export default function MapLibreMap({
   accuracyM = null,
   fitToMarkers = false,
   onPick,
+  onCenterChange,
+  onMoveStart,
+  accuracyAtCenter = false,
   interactive = true,
   className = 'h-72 w-full',
 }: AppMapProps) {
@@ -102,9 +111,13 @@ export default function MapLibreMap({
   const markerRefs = useRef(new Map<string, { m: maplibregl.Marker; kind: MarkerKind; anim?: number }>());
   const radarRef = useRef<maplibregl.Marker | null>(null);
   const onPickRef = useRef(onPick);
-  const latest = useRef({ markers, route, line, accuracyM, center });
+  const onCenterRef = useRef(onCenterChange);
+  const onMoveStartRef = useRef(onMoveStart);
+  const latest = useRef({ markers, route, line, accuracyM, center, accuracyAtCenter });
   onPickRef.current = onPick;
-  latest.current = { markers, route, line, accuracyM, center };
+  onCenterRef.current = onCenterChange;
+  onMoveStartRef.current = onMoveStart;
+  latest.current = { markers, route, line, accuracyM, center, accuracyAtCenter };
 
   // ---- Create the map once ----
   useEffect(() => {
@@ -124,6 +137,17 @@ export default function MapLibreMap({
     map.touchZoomRotate.disableRotation();
     if (interactive) map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     map.on('click', (e) => onPickRef.current?.({ lat: e.lngLat.lat, lng: e.lngLat.lng }));
+    // A move counts as the customer's if it started from a touch, mouse or wheel event.
+    let userMoving = false;
+    map.on('movestart', (e) => {
+      userMoving = Boolean((e as { originalEvent?: Event }).originalEvent);
+      if (userMoving) onMoveStartRef.current?.();
+    });
+    map.on('moveend', () => {
+      const c = map.getCenter();
+      onCenterRef.current?.({ lat: c.lat, lng: c.lng }, userMoving);
+      userMoving = false;
+    });
 
     map.on('load', () => {
       map.addSource('route', { type: 'geojson', data: EMPTY });
@@ -172,16 +196,19 @@ export default function MapLibreMap({
 
   function syncShapes(map: maplibregl.Map) {
     if (!ready.current) return;
-    const { route: r, line: l, accuracyM: acc, markers: ms } = latest.current;
+    const { route: r, line: l, accuracyM: acc, markers: ms, center: c, accuracyAtCenter: atCenter } = latest.current;
     (map.getSource('route') as GeoJSONSource | undefined)?.setData(r && r.length > 1 ? lineFeature(r) : EMPTY);
     (map.getSource('line') as GeoJSONSource | undefined)?.setData(!(r && r.length > 1) && l ? lineFeature(l) : EMPTY);
-    const pin = ms.find((m) => m.kind === 'pin');
+    const pin = atCenter ? c : ms.find((m) => m.kind === 'pin');
     (map.getSource('accuracy') as GeoJSONSource | undefined)?.setData(pin && acc && acc > 5 && acc <= 100 ? circle(pin, acc) : EMPTY);
   }
 
   function fit(map: maplibregl.Map, animate = true) {
     const { markers: ms, route: r, center: c } = latest.current;
     if (!fitToMarkers) {
+      // Skip if already there (the centre pin reports its position back, which would loop).
+      const now = map.getCenter();
+      if (Math.abs(now.lat - c.lat) < 1e-6 && Math.abs(now.lng - c.lng) < 1e-6) return;
       map.easeTo({ center: [c.lng, c.lat], duration: animate ? 600 : 0 });
       return;
     }
@@ -252,11 +279,12 @@ export default function MapLibreMap({
   // ---- Route / line / accuracy ----
   const routeKey = route ? `${route.length}:${route[0]?.lat},${route[route.length - 1]?.lng}` : '';
   const lineKey = line ? `${line[0].lat},${line[0].lng},${line[1].lat},${line[1].lng}` : '';
+  const ringKey = accuracyAtCenter ? `${center.lat},${center.lng}` : '';
   useEffect(() => {
     const map = mapRef.current;
     if (map) syncShapes(map);
      
-  }, [routeKey, lineKey, accuracyM]);
+  }, [routeKey, lineKey, accuracyM, ringKey]);
 
   // ---- Camera: refit only when the set of points meaningfully changes ----
   const fitKey = fitToMarkers
