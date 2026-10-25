@@ -81,6 +81,7 @@ export default function ProDashboard({
   const [period, setPeriod] = useState<Period>('today');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
+  const [payMethod, setPayMethod] = useState<'cash' | 'upi' | 'card' | null>(null);
   const [error, setError] = useState('');
   const lastSent = useRef(0);
   const seenRequests = useRef(new Set(initial.requests.map((r) => r.id)));
@@ -276,7 +277,11 @@ export default function ProDashboard({
                 <form
                   onSubmit={(ev) => {
                     ev.preventDefault();
-                    run(job.id, () => advanceJob(job.id, 'completed', amount || String(job.priceEstimate ?? 0)));
+                    if (!payMethod) {
+                      setError('Choose how the customer paid: cash, UPI or card.');
+                      return;
+                    }
+                    run(job.id, () => advanceJob(job.id, 'completed', amount || String(job.priceEstimate ?? 0), payMethod));
                   }}
                   className="space-y-2"
                 >
@@ -294,6 +299,31 @@ export default function ProDashboard({
                       className="w-full bg-transparent px-2 py-3 text-sm outline-none"
                     />
                   </div>
+                  <fieldset className="pt-1">
+                    <legend className="text-sm font-semibold">How did the customer pay?</legend>
+                    <div className="mt-2 grid grid-cols-3 gap-2">
+                      {([
+                        ['cash', 'Cash'],
+                        ['upi', 'UPI'],
+                        ['card', 'Card'],
+                      ] as const).map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          aria-pressed={payMethod === value}
+                          onClick={() => {
+                            setPayMethod(value);
+                            setError('');
+                          }}
+                          className={`rounded-2xl border-2 py-3 text-sm font-bold transition ${
+                            payMethod === value ? 'border-ink bg-ink text-white' : 'border-neutral-200 text-neutral-700 hover:border-neutral-400'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
                   <button
                     type="submit"
                     disabled={busyId === job.id}

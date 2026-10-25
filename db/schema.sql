@@ -56,3 +56,8 @@ create table if not exists investor_messages (
   created_at timestamptz not null default now()
 );
 create index if not exists investor_messages_created_at_idx on investor_messages (created_at desc);
+
+alter table bookings add column if not exists payment_method text;
+alter table bookings drop constraint if exists bookings_payment_method_check;
+alter table bookings add constraint bookings_payment_method_check
+  check (payment_method is null or payment_method in ('cash', 'upi', 'card'));

@@ -16,6 +16,8 @@ export type JobStatus =
   | 'cancelled'
   | 'expired';
 
+export type PaymentMethodValue = 'cash' | 'upi' | 'card';
+
 export const ACTIVE_JOB_STATUSES: JobStatus[] = ['accepted', 'arrived', 'in_progress'];
 /** A booking nobody accepts within this time is marked expired. */
 export const SEARCH_TIMEOUT_MINUTES = 30;
@@ -133,6 +135,7 @@ export interface CustomerBooking {
   priceEstimate: number | null;
   nightCharge: number;
   finalAmount: number | null;
+  paymentMethod: PaymentMethodValue | null;
   createdAt: string;
   acceptedAt: string | null;
   arrivedAt: string | null;
@@ -163,6 +166,7 @@ function mapCustomerBooking(r: Record<string, unknown>): CustomerBooking {
     priceEstimate: num(r.price_estimate),
     nightCharge: Number(r.night_charge ?? 0),
     finalAmount: num(r.final_amount),
+    paymentMethod: (r.payment_method as PaymentMethodValue) ?? null,
     createdAt: iso(r.created_at)!,
     acceptedAt: iso(r.accepted_at),
     arrivedAt: iso(r.arrived_at),
@@ -462,14 +466,31 @@ export async function markStarted(proUid: string, id: string): Promise<boolean> 
   return rows.length > 0;
 }
 
-export async function markCompleted(proUid: string, id: string, finalAmount: number): Promise<boolean> {
+export async function markCompleted(
+  proUid: string,
+  id: string,
+  finalAmount: number,
+  paymentMethod: 'cash' | 'upi' | 'card'
+): Promise<boolean> {
   const commission = Math.round((finalAmount * commissionPercent()) / 100);
   const sql = getSql();
-  const rows = (await sql`
-    update bookings set status = 'completed', completed_at = now(), final_amount = ${finalAmount},
-           commission_amount = ${commission}, pro_earning = ${finalAmount - commission}
-    where id = ${id} and pro_uid = ${proUid} and status = 'in_progress' returning id`) as unknown[];
-  return rows.length > 0;
+  try {
+    const rows = (await sql`
+      update bookings set status = 'completed', completed_at = now(), final_amount = ${finalAmount},
+             commission_amount = ${commission}, pro_earning = ${finalAmount - commission},
+             payment_method = ${paymentMethod}
+      where id = ${id} and pro_uid = ${proUid} and status = 'in_progress' returning id`) as unknown[];
+    return rows.length > 0;
+  } catch (err) {
+    // 42703 = column missing (005_payment_method.sql not run yet). Still complete the job.
+    if ((err as { code?: string }).code !== '42703') throw err;
+    console.error('[DB] payment_method column missing; run db/migrations/005_payment_method.sql');
+    const rows = (await sql`
+      update bookings set status = 'completed', completed_at = now(), final_amount = ${finalAmount},
+             commission_amount = ${commission}, pro_earning = ${finalAmount - commission}
+      where id = ${id} and pro_uid = ${proUid} and status = 'in_progress' returning id`) as unknown[];
+    return rows.length > 0;
+  }
 }
 
 export interface EarningsSummary {
@@ -543,9 +564,14 @@ export interface AdminBooking {
   preferredSlot: string;
   notes: string | null;
   proName: string | null;
+  proTrade: Trade | null;
   finalAmount: number | null;
   commission: number | null;
+  paymentMethod: PaymentMethodValue | null;
   createdAt: string;
+  acceptedAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
 }
 
 export async function listBookingsForAdmin(limit = 100): Promise<AdminBooking[]> {
@@ -553,7 +579,9 @@ export async function listBookingsForAdmin(limit = 100): Promise<AdminBooking[]>
   const rows = (await sql`
     select b.id, b.service, b.status, u.name as customer_name, b.contact_name, b.contact_phone, b.address,
            b.preferred_date::text as preferred_date, b.preferred_slot, b.notes,
-           p.name as pro_name, b.final_amount, b.commission_amount, b.created_at
+           p.name as pro_name, p.trade as pro_trade, b.final_amount, b.commission_amount,
+           to_jsonb(b)->>'payment_method' as payment_method, -- works before 005_payment_method.sql is run
+           b.created_at, b.accepted_at, b.completed_at, b.cancelled_at
     from bookings b join users u on u.uid = b.uid left join professionals p on p.uid = b.pro_uid
     order by b.created_at desc limit ${limit}`) as Record<string, unknown>[];
   return rows.map((r) => ({
@@ -568,9 +596,14 @@ export async function listBookingsForAdmin(limit = 100): Promise<AdminBooking[]>
     preferredSlot: String(r.preferred_slot),
     notes: (r.notes as string) ?? null,
     proName: (r.pro_name as string) ?? null,
+    proTrade: (r.pro_trade as Trade) ?? null,
     finalAmount: num(r.final_amount),
     commission: num(r.commission_amount),
+    paymentMethod: (r.payment_method as PaymentMethodValue) ?? null,
     createdAt: iso(r.created_at)!,
+    acceptedAt: iso(r.accepted_at),
+    completedAt: iso(r.completed_at),
+    cancelledAt: iso(r.cancelled_at),
   }));
 }
 
@@ -581,4 +614,38 @@ export async function getPlatformTotals(): Promise<{ completedJobs: number; gros
     from bookings where status = 'completed'`) as Record<string, unknown>[];
   const r = rows[0] ?? {};
   return { completedJobs: Number(r.jobs ?? 0), gross: Number(r.gross ?? 0), commission: Number(r.commission ?? 0) };
+}
+
+export interface OrderStats {
+  /** Last N days in India time, oldest first. */
+  daily: { date: string; booked: number; completed: number }[];
+  /** Completed jobs by how the customer paid. */
+  payments: { method: PaymentMethodValue | 'unknown'; jobs: number; amount: number }[];
+}
+
+export async function getOrderStats(days = 14): Promise<OrderStats> {
+  const sql = getSql();
+  const daily = (await sql`
+    with d as (
+      select generate_series(
+        (now() at time zone 'Asia/Kolkata')::date - (${days}::int - 1),
+        (now() at time zone 'Asia/Kolkata')::date,
+        interval '1 day'
+      )::date as day
+    )
+    select d.day::text as date,
+      (select count(*) from bookings b where (b.created_at at time zone 'Asia/Kolkata')::date = d.day) as booked,
+      (select count(*) from bookings b where b.status = 'completed' and (b.completed_at at time zone 'Asia/Kolkata')::date = d.day) as completed
+    from d order by d.day`) as Record<string, unknown>[];
+  const payments = (await sql`
+    select coalesce(to_jsonb(b)->>'payment_method', 'unknown') as method, count(*) as jobs, coalesce(sum(b.final_amount), 0) as amount
+    from bookings b where b.status = 'completed'
+    group by 1`) as Record<string, unknown>[];
+  const order = ['upi', 'cash', 'card', 'unknown'];
+  return {
+    daily: daily.map((r) => ({ date: String(r.date), booked: Number(r.booked), completed: Number(r.completed) })),
+    payments: payments
+      .map((r) => ({ method: String(r.method) as PaymentMethodValue | 'unknown', jobs: Number(r.jobs), amount: Number(r.amount) }))
+      .sort((a, b) => order.indexOf(a.method) - order.indexOf(b.method)),
+  };
 }

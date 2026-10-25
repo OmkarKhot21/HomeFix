@@ -159,12 +159,16 @@ export const liveBookingSchema = z.object({
 
 export const locationSchema = z.object({ lat: latSchema, lng: lngSchema });
 
+export const PAYMENT_METHODS = ['cash', 'upi', 'card'] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
 export const completeJobSchema = z.object({
   amount: z.coerce
     .number({ message: 'Please enter the amount collected.' })
     .int('Use a whole rupee amount.')
     .min(0, 'Amount cannot be negative.')
     .max(200000, 'Please check the amount.'),
+  paymentMethod: z.enum(PAYMENT_METHODS, { message: 'Choose how the customer paid: cash, UPI or card.' }),
 });
 
 // ===== Investor messages =====

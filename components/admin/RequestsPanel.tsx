@@ -1,7 +1,8 @@
 import { getRecentCallbacks, getRecentInvestorMessages, type InvestorMessageRow } from '@/lib/db';
-import { listBookingsForAdmin, listProfessionalsForAdmin, getPlatformTotals, commissionPercent } from '@/lib/liveDb';
-import { STATUS_META } from '@/lib/bookingStatus';
+import { listBookingsForAdmin, listProfessionalsForAdmin, getPlatformTotals, getOrderStats, commissionPercent } from '@/lib/liveDb';
 import ProStatusButtons from './ProStatusButtons';
+import OrdersInsights from './OrdersInsights';
+import OrdersTable from './OrdersTable';
 
 // Server-rendered operations panel for the admin dashboard: professionals to approve,
 // live and past jobs, platform earnings and callback requests.
@@ -20,11 +21,12 @@ const PRO_BADGE: Record<string, string> = {
 export default async function RequestsPanel() {
   let data;
   try {
-    const [bookings, pros, callbacks, totals] = await Promise.all([
+    const [bookings, pros, callbacks, totals, stats] = await Promise.all([
       listBookingsForAdmin(),
       listProfessionalsForAdmin(),
       getRecentCallbacks(),
       getPlatformTotals(),
+      getOrderStats(14),
     ]);
     // Loaded separately so the panel still works before 004_investor_messages.sql is run.
     let investorMessages: InvestorMessageRow[] | null = null;
@@ -33,7 +35,7 @@ export default async function RequestsPanel() {
     } catch (err) {
       console.error('[ADMIN] Could not load investor messages:', err);
     }
-    data = { bookings, pros, callbacks, totals, investorMessages };
+    data = { bookings, pros, callbacks, totals, stats, investorMessages };
   } catch (err) {
     console.error('[ADMIN] Could not load operations data:', err);
     return (
@@ -99,35 +101,9 @@ export default async function RequestsPanel() {
         </div>
       </div>
 
-      {/* Jobs */}
-      <div className={card}>
-        <h2 className="text-lg font-bold">Jobs <span className="text-zinc-500">({data.bookings.length})</span></h2>
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[980px]">
-            <thead><tr><th className={th}>#</th><th className={th}>Service</th><th className={th}>Status</th><th className={th}>Customer</th><th className={th}>Phone</th><th className={th}>Address</th><th className={th}>When</th><th className={th}>Professional</th><th className={th}>Amount</th><th className={th}>Created</th></tr></thead>
-            <tbody className="divide-y divide-zinc-800">
-              {data.bookings.length === 0 && <tr><td className={td} colSpan={10}>No jobs yet.</td></tr>}
-              {data.bookings.map((b) => (
-                <tr key={b.id}>
-                  <td className={td}>{b.id}</td>
-                  <td className={td}>{b.service}</td>
-                  <td className={td}>{STATUS_META[b.status]?.label ?? b.status}</td>
-                  <td className={td}>
-                    {b.customerName || '—'}
-                    {b.contactName && <span className="block text-xs text-zinc-500">Contact: {b.contactName}</span>}
-                  </td>
-                  <td className={td}><a href={`tel:+91${b.contactPhone}`} className="underline">{b.contactPhone}</a></td>
-                  <td className={`${td} max-w-xs`}>{b.address}{b.notes ? <span className="mt-1 block text-zinc-500">“{b.notes}”</span> : null}</td>
-                  <td className={td}>{b.preferredDate}<br /><span className="text-zinc-500">{b.preferredSlot}</span></td>
-                  <td className={td}>{b.proName || '—'}</td>
-                  <td className={td}>{b.finalAmount !== null ? `₹${b.finalAmount}` : '—'}{b.commission !== null ? <span className="block text-xs text-zinc-500">₹{b.commission} commission</span> : null}</td>
-                  <td className={td}>{formatIST(b.createdAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* Orders: charts + table */}
+      <OrdersInsights stats={data.stats} />
+      <OrdersTable orders={data.bookings} />
 
       {/* Investor messages */}
       <div className={card}>

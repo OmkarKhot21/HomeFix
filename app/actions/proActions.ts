@@ -127,7 +127,8 @@ export async function releaseJob(id: string): Promise<Result> {
 export async function advanceJob(
   id: string,
   step: 'arrived' | 'started' | 'completed',
-  amount?: number | string
+  amount?: number | string,
+  paymentMethod?: string
 ): Promise<Result> {
   if (!validId(id)) return { ok: false, error: 'Invalid job.' };
   const r = await requireApprovedPro();
@@ -137,9 +138,9 @@ export async function advanceJob(
     if (step === 'arrived') ok = await markArrived(r.pro.uid, id);
     else if (step === 'started') ok = await markStarted(r.pro.uid, id);
     else {
-      const parsed = completeJobSchema.safeParse({ amount });
+      const parsed = completeJobSchema.safeParse({ amount, paymentMethod });
       if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message || 'Please enter the amount.' };
-      ok = await markCompleted(r.pro.uid, id, parsed.data.amount);
+      ok = await markCompleted(r.pro.uid, id, parsed.data.amount, parsed.data.paymentMethod);
     }
     return ok ? { ok: true } : { ok: false, error: 'This job has already moved on. Refreshing…' };
   } catch (err) {

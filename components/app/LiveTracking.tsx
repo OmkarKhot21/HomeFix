@@ -138,7 +138,11 @@ export default function LiveTracking({ initial }: { initial: TrackingData }) {
             <p className="mt-1 text-sm text-neutral-600">All our nearby professionals are busy right now. Please try booking again in a few minutes, or request a callback and our team will arrange a visit.</p>
           )}
           {b.status === 'completed' && b.finalAmount !== null && (
-            <p className="mt-1 text-sm text-neutral-600">Total paid ₹{b.finalAmount} · Covered by our 7-day warranty</p>
+            <p className="mt-1 text-sm text-neutral-600">
+              Paid ₹{b.finalAmount}
+              {b.paymentMethod ? ` by ${b.paymentMethod === 'upi' ? 'UPI' : b.paymentMethod === 'cash' ? 'cash' : 'card'}` : ''} · Covered by
+              our 7-day warranty
+            </p>
           )}
         </div>
 
