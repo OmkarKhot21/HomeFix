@@ -6,6 +6,10 @@ import * as maplibregl from 'maplibre-gl';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { LatLng } from '@/lib/geo';
 
+// MapLibre 6 can't locate its worker inside the Next.js bundle, so we serve it ourselves
+// (copied by scripts/copy-maplibre-worker.mjs). Must be set before the first map is created.
+maplibregl.setWorkerUrl(`/maplibre/maplibre-gl-worker.mjs?v=${maplibregl.getVersion()}`);
+
 // Smooth, GPU-drawn map (MapLibre GL) with free OpenFreeMap tiles: no API key, no usage limit.
 
 export type MarkerKind = 'home' | 'pro' | 'pin';
