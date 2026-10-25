@@ -24,9 +24,12 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, .font-display {
-  font-family: var(--font-display);
-  letter-spacing: -0.025em;
+/* In the base layer so Tailwind classes (e.g. the headline font) can override it */
+@layer base {
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+  }
 }
 
 ::selection { background: #FFC800; color: #0A0A0A; }

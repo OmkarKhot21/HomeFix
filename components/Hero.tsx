@@ -41,7 +41,7 @@ export default function Hero({ onSelect }: { onSelect?: (service: Service) => vo
             </span>
           </div>
 
-          <h1 className="mt-6 font-display text-5xl font-extrabold leading-[1.02] tracking-tight text-ink sm:text-6xl lg:text-7xl">
+          <h1 className="mt-6 text-5xl font-extrabold leading-[1.02] tracking-[-0.035em] text-ink [font-family:var(--font-headline)] sm:text-6xl lg:text-7xl">
             Home repairs,
             <br />
             at your door in{' '}
