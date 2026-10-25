@@ -59,7 +59,7 @@ export function LegalPage({
         <div className="mt-14 flex flex-wrap gap-x-6 gap-y-2 border-t border-neutral-200 pt-6 text-sm">
           <Link href="/privacy" className="font-semibold text-neutral-700 hover:text-ink">Privacy Policy</Link>
           <Link href="/terms" className="font-semibold text-neutral-700 hover:text-ink">Terms of Service</Link>
-          <a href={`mailto:${LEGAL.email}`} className="font-semibold text-neutral-700 hover:text-ink">{LEGAL.email}</a>
+          <a href="/contact" className="font-semibold text-neutral-700 hover:text-ink">Contact us</a>
         </div>
       </main>
     </div>

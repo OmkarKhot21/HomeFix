@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: `The terms for booking and providing services on ${LEGAL.brand}.`,
 };
 
-const mail = <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>;
+const contact = <a href="/contact">request a callback</a>;
 
 export default function TermsPage() {
   return (
@@ -80,7 +80,7 @@ export default function TermsPage() {
           body: (
             <p>
               You pay the professional directly after the work is done, by UPI, card or cash. The professional records the amount and payment method in the
-              app, and you can see it on your booking. Please do not pay more than the agreed amount, and tell us at {mail} if anyone asks you to.
+              app, and you can see it on your booking. Please do not pay more than the agreed amount. If anyone asks you to, please {contact} and let us know.
             </p>
           ),
         },
@@ -102,7 +102,7 @@ export default function TermsPage() {
             <>
               <p>
                 Every completed job has a 7-day workmanship warranty from the day it is completed. If the same problem returns within 7 days, we send a
-                professional to fix it at no extra labour charge. To claim, contact us at {mail} with your booking number.
+                professional to fix it at no extra labour charge. To claim, {contact} and share your booking number.
               </p>
               <p>
                 The warranty does not cover new or different problems, damage caused by misuse or accidents, or parts that you supplied. Replacement parts
@@ -159,8 +159,7 @@ export default function TermsPage() {
           body: (
             <>
               <p>
-                We take care to verify professionals and to resolve problems quickly. If something goes wrong with a job, tell us within 7 days at {mail}{' '}
-                and we will investigate and work with you and the professional to put it right.
+                We take care to verify professionals and to resolve problems quickly. If something goes wrong with a job, {contact} within 7 days and we will investigate and work with you and the professional to put it right.
               </p>
               <p>
                 To the extent the law allows, our total liability for any booking is limited to the amount you paid for that booking, and we are not
@@ -186,8 +185,7 @@ export default function TermsPage() {
           body: (
             <p>
               We may update these terms. If the change is significant, we will tell you in the app before it applies. These terms are governed by the laws
-              of India, and the courts at {LEGAL.jurisdiction} have jurisdiction. We always try to resolve complaints directly first, so please write to{' '}
-              {mail}.
+              of India, and the courts at {LEGAL.jurisdiction} have jurisdiction. We always try to resolve complaints directly first, so please {contact} first.
             </p>
           ),
         },

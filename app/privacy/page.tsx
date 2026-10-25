@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: `How ${LEGAL.brand} collects, uses and protects your personal data.`,
 };
 
-const mail = <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>;
+const contact = <a href="/contact">request a callback</a>;
 
 export default function PrivacyPage() {
   return (
@@ -157,7 +157,7 @@ export default function PrivacyPage() {
                 <li>nominate someone to exercise these rights for you in case of death or incapacity;</li>
                 <li>raise a complaint with our Grievance Officer, and then with the Data Protection Board of India.</li>
               </ul>
-              <p>To use any of these rights, email {mail}. We will reply within 30 days.</p>
+              <p>To use any of these rights, {contact} and tell our team what you need. We will reply within 30 days.</p>
             </>
           ),
         },
@@ -179,7 +179,7 @@ export default function PrivacyPage() {
               <br />
               {LEGAL.entity}, {LEGAL.jurisdiction}
               <br />
-              Email: {mail}
+              Contact: <a href="/contact">Request a callback</a>
             </p>
           ),
         },

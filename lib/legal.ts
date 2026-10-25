@@ -4,8 +4,6 @@ export const LEGAL = {
   brand: 'HomeFix',
   /** Registered business / legal entity name (e.g. "HomeFix Services Pvt. Ltd." or the proprietor's name). */
   entity: 'HomeFix Technologies Pvt. Ltd.',
-  /** Where customers and professionals can write to us about privacy, complaints or these terms. */
-  email: 'support@homefix.in',
   /** Grievance Officer required under India's DPDP Act, 2023 and IT Rules, 2011. */
   grievanceOfficer: 'Grievance Officer, HomeFix',
   /** City used for "courts at" in the Terms. */
