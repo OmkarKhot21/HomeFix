@@ -24,7 +24,12 @@ function sanitizeCsvField(value: string | number | null | undefined): string {
   return `"${str.replace(/"/g, '""')}"`;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Only allow downloads started from our own site (or typed into the address bar), not from other sites.
+  if (req.headers.get('sec-fetch-site') === 'cross-site') {
+    return new NextResponse('Forbidden', { status: 403, headers: { 'Content-Type': 'text/plain' } });
+  }
+
   // Enforce session check on admin API route
   const auth = await verifyAdminApi();
   if (!auth.authorized) {

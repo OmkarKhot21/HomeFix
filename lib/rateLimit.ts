@@ -144,6 +144,9 @@ export async function checkRateLimit(
 }
 
 export function extractClientIp(headers: Headers): string {
+  // Vercel sets these itself from the real connection, so visitors can't fake them.
+  const vercelIp = headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim();
+  if (vercelIp) return vercelIp;
   const forwarded = headers.get('x-forwarded-for');
   if (forwarded) {
     return forwarded.split(',')[0].trim();

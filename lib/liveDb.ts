@@ -211,7 +211,14 @@ export async function createLiveBooking(b: {
 }
 
 /** Marks bookings that nobody accepted in time as expired. Cheap; called from polling endpoints. */
+// Polling endpoints call this every few seconds; run the update at most every 30 s per server
+// instance. Bookings only expire after SEARCH_TIMEOUT_MINUTES, so the delay is unnoticeable.
+const EXPIRE_EVERY_MS = 30_000;
+let lastExpireRun = 0;
+
 export async function expireStaleBookings(): Promise<void> {
+  if (Date.now() - lastExpireRun < EXPIRE_EVERY_MS) return;
+  lastExpireRun = Date.now();
   const sql = getSql();
   await sql`
     update bookings set status = 'expired'
