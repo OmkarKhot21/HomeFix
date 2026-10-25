@@ -222,3 +222,31 @@ body {
   background: linear-gradient(120deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 38%);
   pointer-events: none;
 }
+
+/* ===== Reviews: drifting frosted-glass cards ===== */
+.hf-review-card {
+  position: relative;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 20px 40px -24px rgba(0, 0, 0, 0.8);
+}
+/* Real blur only on larger screens; on phones the translucent gradient alone keeps scrolling smooth */
+@media (min-width: 768px) {
+  .hf-review-card {
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
+  }
+}
+.hf-reviews-viewport {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+.hf-reviews-track { animation: hf-marquee 70s linear infinite; will-change: transform; }
+.hf-reviews-viewport:hover .hf-reviews-track,
+.hf-reviews-viewport:focus-within .hf-reviews-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .hf-reviews-track { animation: none; }
+  .hf-reviews-viewport { overflow-x: auto; scroll-snap-type: x mandatory; -webkit-mask-image: none; mask-image: none; }
+  .hf-reviews-viewport .hf-review-card { scroll-snap-align: start; }
+  .hf-reviews-track > [aria-hidden="true"] { display: none; }
+}

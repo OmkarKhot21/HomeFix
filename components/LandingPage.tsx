@@ -12,6 +12,7 @@ import TrackingShowcase from '@/components/landing/TrackingShowcase';
 import { WhyHomeFix } from '@/components/landing/TrustAndPricing';
 import { Coverage, ForProfessionals } from '@/components/landing/CoverageAndPartners';
 import { Faq, FinalCta } from '@/components/landing/FaqAndCta';
+import Reviews from '@/components/landing/Reviews';
 import Footer from '@/components/Footer';
 import LeadCaptureModal from '@/components/LeadCaptureModal';
 import ServiceModal from '@/components/ServiceModal';
@@ -38,6 +39,7 @@ export default function LandingPage() {
         <WhyHomeFix />
         <Coverage />
         <ForProfessionals />
+        <Reviews />
         <Faq />
         <FinalCta />
         <Footer onOpenInvestor={() => setIsInvestorModalOpen(true)} />
