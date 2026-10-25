@@ -129,7 +129,7 @@ export default function MapLibreMap({
       map.addSource('route', { type: 'geojson', data: EMPTY });
       map.addSource('line', { type: 'geojson', data: EMPTY });
       map.addSource('accuracy', { type: 'geojson', data: EMPTY });
-      map.addLayer({ id: 'accuracy-fill', type: 'fill', source: 'accuracy', paint: { 'fill-color': '#FFC800', 'fill-opacity': 0.18 } });
+      map.addLayer({ id: 'accuracy-fill', type: 'fill', source: 'accuracy', paint: { 'fill-color': '#FFC800', 'fill-opacity': 0.14 } });
       map.addLayer({ id: 'accuracy-edge', type: 'line', source: 'accuracy', paint: { 'line-color': '#C79C00', 'line-width': 1.5, 'line-opacity': 0.7 } });
       // Road route: white casing under a black line reads clearly on the light map.
       map.addLayer({
@@ -176,7 +176,7 @@ export default function MapLibreMap({
     (map.getSource('route') as GeoJSONSource | undefined)?.setData(r && r.length > 1 ? lineFeature(r) : EMPTY);
     (map.getSource('line') as GeoJSONSource | undefined)?.setData(!(r && r.length > 1) && l ? lineFeature(l) : EMPTY);
     const pin = ms.find((m) => m.kind === 'pin');
-    (map.getSource('accuracy') as GeoJSONSource | undefined)?.setData(pin && acc && acc > 5 ? circle(pin, Math.min(acc, 500)) : EMPTY);
+    (map.getSource('accuracy') as GeoJSONSource | undefined)?.setData(pin && acc && acc > 5 && acc <= 100 ? circle(pin, acc) : EMPTY);
   }
 
   function fit(map: maplibregl.Map, animate = true) {
