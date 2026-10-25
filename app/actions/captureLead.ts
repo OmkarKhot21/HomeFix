@@ -3,7 +3,8 @@
 import { headers } from 'next/headers';
 import { db } from '@/lib/db';
 import { checkRateLimit, extractClientIp } from '@/lib/rateLimit';
-import { investorLeadSchema, waitlistLeadSchema } from '@/lib/validations';
+import { investorLeadSchema, waitlistLeadSchema, callbackSchema } from '@/lib/validations';
+import { addCallbackRequest } from '@/lib/db';
 
 export async function captureInvestor(formData: FormData) {
   const reqHeaders = await headers();
@@ -72,5 +73,35 @@ export async function captureWaitlist(formData: FormData) {
   } catch (err) {
     console.error('[DATABASE ERROR in captureWaitlist]:', err);
     return { error: 'Unable to save lead. Please try again.' };
+  }
+}
+
+export async function captureCallback(formData: FormData) {
+  const reqHeaders = await headers();
+  const clientIp = extractClientIp(reqHeaders);
+
+  // Rate Limiting: Max 5 callback requests per 10 minutes per IP
+  const rateLimit = await checkRateLimit(`callback:${clientIp}`, 5, 10 * 60 * 1000);
+  if (!rateLimit.allowed) {
+    return { error: 'Too many requests. Please try again in a few minutes.' };
+  }
+
+  // Honeypot check: reject bot submissions silently
+  const honeypot = formData.get('website');
+  if (typeof honeypot === 'string' && honeypot.length > 0) {
+    return { success: true };
+  }
+
+  const parseResult = callbackSchema.safeParse({ phone: formData.get('phone') });
+  if (!parseResult.success) {
+    return { error: parseResult.error.issues[0]?.message || 'Please enter a valid 10-digit mobile number.' };
+  }
+
+  try {
+    await addCallbackRequest(parseResult.data.phone);
+    return { success: true };
+  } catch (err) {
+    console.error('[DATABASE ERROR in captureCallback]:', err);
+    return { error: 'Unable to send your request. Please try again.' };
   }
 }

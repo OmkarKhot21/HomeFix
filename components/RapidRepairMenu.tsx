@@ -3,17 +3,11 @@
 import { ArrowUpRight, Zap } from 'lucide-react';
 import { SERVICES } from '@/components/designs/data';
 import { REPAIR_ICONS } from '@/components/RepairIcons';
+import { getServiceByName, type Service } from '@/lib/services';
 
 // "Instant Booking Menu" — the 10 quick repair boxes from the Express design concept.
-// Clicking a box scrolls up to the hero waitlist form and focuses the phone field.
-export default function RapidRepairMenu() {
-  const goToForm = () => {
-    const el = document.getElementById('get-app');
-    if (!el) return;
-    el.scrollIntoView({ behavior: 'smooth' });
-    const input = el.querySelector<HTMLInputElement>('input[name="phone"]');
-    if (input) setTimeout(() => input.focus(), 400);
-  };
+// Clicking a box opens the service popup.
+export default function RapidRepairMenu({ onSelect }: { onSelect: (service: Service) => void }) {
 
   return (
     <section id="rapid-repair" className="relative bg-[#0B0F14] py-14 sm:py-20 text-white">
@@ -27,7 +21,7 @@ export default function RapidRepairMenu() {
               What needs rapid repair?
             </h2>
           </div>
-          <p className="text-sm text-white/55">Tap a repair to get notified first</p>
+          <p className="text-sm text-white/55">Tap a repair to see what’s included</p>
         </div>
 
         <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -37,7 +31,10 @@ export default function RapidRepairMenu() {
             <button
               key={name}
               type="button"
-              onClick={goToForm}
+              onClick={() => {
+                const service = getServiceByName(name);
+                if (service) onSelect(service);
+              }}
               className="group relative flex min-h-[150px] flex-col justify-between rounded-2xl bg-white/[0.04] p-4 text-left ring-1 ring-white/10 transition hover:bg-white/[0.08] hover:ring-[#C6F432]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F432]"
             >
               <span className="text-[#C6F432]">

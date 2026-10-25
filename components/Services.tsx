@@ -1,6 +1,10 @@
 'use client';
 
 import { Droplets, Zap, Hammer, Check, ArrowRight } from 'lucide-react';
+import { getService, type Service } from '@/lib/services';
+
+// Popup opened by each card's Book Now button (see lib/services.ts)
+const CATEGORY_SLUGS = ['plumbing', 'electrical', 'carpentry'];
 
 const services = [
   {
@@ -29,7 +33,7 @@ const services = [
   },
 ];
 
-export default function Services() {
+export default function Services({ onSelect }: { onSelect: (service: Service) => void }) {
   return (
     <section id="services" className="py-14 sm:py-16 bg-transparent border-b border-slate-200/60 relative overflow-hidden">
       <div className="container mx-auto px-6 max-w-7xl">
@@ -103,14 +107,8 @@ export default function Services() {
                 <button 
                   type="button"
                   onClick={() => {
-                    const el = document.getElementById('get-app');
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth' });
-                      const input = el.querySelector<HTMLInputElement>('input[name="phone"]');
-                      if (input) {
-                        setTimeout(() => input.focus(), 400);
-                      }
-                    }
+                    const picked = getService(CATEGORY_SLUGS[index]);
+                    if (picked) onSelect(picked);
                   }}
                   className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-slate-50 hover:bg-slate-900 hover:text-white font-bold text-xs uppercase tracking-wider text-slate-800 border border-slate-200/80 hover:border-slate-900 transition-all duration-200"
                 >

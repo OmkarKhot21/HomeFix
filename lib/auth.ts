@@ -8,7 +8,7 @@ export const SESSION_COOKIE_NAME = 'homefix_admin_session';
 // Fallback runtime secret for local development only
 let devEphemeralSecret: string | null = null;
 
-function getSecretKey(): Uint8Array {
+export function getSecretKey(): Uint8Array {
   const envSecret = process.env.SESSION_SECRET;
 
   if (envSecret && envSecret.trim().length >= 32) {
@@ -54,6 +54,12 @@ export async function verifySessionToken(
     const { payload } = await jwtVerify(token, getSecretKey(), {
       algorithms: ['HS256'],
     });
+
+    // Only admin tokens may pass. Customer session tokens are signed with the
+    // same secret but carry role 'user', so they must be rejected here.
+    if (payload.role !== 'admin') {
+      return { valid: false };
+    }
 
     return {
       valid: true,

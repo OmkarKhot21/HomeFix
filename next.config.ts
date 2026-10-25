@@ -36,11 +36,15 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      // Google sign-in popup helper script
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self'",
+      // Firebase Auth APIs
+      "connect-src 'self' https://*.googleapis.com https://apis.google.com",
+      // Firebase auth iframe (your-project.firebaseapp.com)
+      "frame-src 'self' https://*.firebaseapp.com https://*.web.app",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -49,6 +53,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  images: {
+    // Professional photos in the service popups (lib/services.ts)
+    remotePatterns: [{ protocol: 'https', hostname: 'images.pexels.com', pathname: '/photos/**', search: '' }],
+  },
   async headers() {
     return [
       {

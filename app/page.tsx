@@ -9,9 +9,14 @@ import RapidRepairMenu from '@/components/RapidRepairMenu';
 import AppDownloadBanner from '@/components/AppDownloadBanner';
 import Footer from '@/components/Footer';
 import LeadCaptureModal from '@/components/LeadCaptureModal';
+import ServiceModal from '@/components/ServiceModal';
+import { useCurrentUser } from '@/components/useCurrentUser';
+import type { Service } from '@/lib/services';
 
 export default function Home() {
   const [isInvestorModalOpen, setIsInvestorModalOpen] = useState(false);
+  const [activeService, setActiveService] = useState<Service | null>(null);
+  const { user } = useCurrentUser();
 
   return (
     <main className="relative min-h-screen bg-slate-50 selection:bg-black selection:text-white overflow-x-hidden">
@@ -38,14 +43,20 @@ export default function Home() {
 
       {/* Page Content Layers */}
       <div className="relative z-10">
-        <Navbar onOpenInvestor={() => setIsInvestorModalOpen(true)} />
+        <Navbar user={user} onOpenInvestor={() => setIsInvestorModalOpen(true)} />
         <Hero />
         <KpiSection />
-        <RapidRepairMenu />
-        <Services />
+        <RapidRepairMenu onSelect={setActiveService} />
+        <Services onSelect={setActiveService} />
         <AppDownloadBanner />
         <Footer onOpenInvestor={() => setIsInvestorModalOpen(true)} />
       </div>
+
+      <ServiceModal
+        service={activeService}
+        isLoggedIn={Boolean(user)}
+        onClose={() => setActiveService(null)}
+      />
 
       <LeadCaptureModal 
         isOpen={isInvestorModalOpen} 

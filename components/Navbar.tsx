@@ -1,9 +1,19 @@
 'use client';
 
-import { Menu, X, Smartphone } from 'lucide-react';
+import { Menu, X, LogIn, LogOut, CalendarCheck } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
+import { logoutUser } from '@/app/actions/userActions';
+import type { SessionUser } from '@/lib/userAuth';
 
-export default function Navbar({ onOpenInvestor }: { onOpenInvestor?: () => void }) {
+export default function Navbar({
+  user,
+  onOpenInvestor,
+}: {
+  user?: SessionUser | null;
+  onOpenInvestor?: () => void;
+}) {
+  const firstName = user?.name?.split(" ")[0] || null;
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -49,12 +59,33 @@ export default function Navbar({ onOpenInvestor }: { onOpenInvestor?: () => void
             )}
           </ul>
           
-          <a 
-            href="#get-app"
-            className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all shadow-md"
-          >
-            <Smartphone size={16} /> Get The App
-          </a>
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/book"
+                className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider hover:bg-slate-800 transition-all shadow-md"
+              >
+                <CalendarCheck size={16} /> {firstName ? `Hi, ${firstName}` : 'Book a service'}
+              </Link>
+              <form action={logoutUser}>
+                <button
+                  type="submit"
+                  aria-label="Log out"
+                  title="Log out"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 text-slate-600 hover:border-black hover:text-black transition"
+                >
+                  <LogOut size={16} />
+                </button>
+              </form>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full font-bold text-xs uppercase tracking-wider hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all shadow-md"
+            >
+              <LogIn size={16} /> Login
+            </Link>
+          )}
         </nav>
       </div>
     </header>

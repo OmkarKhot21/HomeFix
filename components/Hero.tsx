@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ShieldCheck, Zap, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
-import { captureWaitlist } from '@/app/actions/captureLead';
+import { ShieldCheck, Zap, PhoneCall, CheckCircle2, Sparkles } from 'lucide-react';
+import { captureCallback } from '@/app/actions/captureLead';
 
 export default function Hero() {
   const [phone, setPhone] = useState('');
@@ -23,7 +23,7 @@ export default function Hero() {
     formData.set('phone', phone);
     
     try {
-      const res = await captureWaitlist(formData);
+      const res = await captureCallback(formData);
       if ('success' in res && res.success) {
         setStatus('success');
       } else {
@@ -74,12 +74,13 @@ export default function Hero() {
             On-demand verified plumbers, electricians, and carpenters. Track technician arrival live, pay pre-set standard prices, and enjoy a 30-day workmanship guarantee.
           </p>
 
-          {/* "Get App Link via SMS" form */}
+          {/* Request a callback form */}
+          <p className="text-sm font-semibold text-slate-800 mb-2">Request a callback from our team</p>
           <div id="get-app" className="scroll-mt-28 bg-white/95 backdrop-blur-md p-2 rounded-2xl border border-slate-300/80 shadow-[0_10px_30px_rgba(0,0,0,0.06)] hover:border-slate-400 focus-within:border-black focus-within:ring-4 focus-within:ring-slate-100 transition-all max-w-lg w-full mb-4 text-left">
             {status === 'success' ? (
               <div className="flex items-center gap-3 p-3 text-emerald-800 bg-emerald-50/80 rounded-xl font-semibold text-sm">
                 <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
-                <span>You&apos;re on the list! We&apos;ll text you the app link at launch.</span>
+                <span>Thanks! Our team will call you back shortly.</span>
               </div>
             ) : (
               <form onSubmit={handleGetLink} className="flex flex-col sm:flex-row gap-2 relative">
@@ -104,7 +105,8 @@ export default function Hero() {
                         setErrorMessage('');
                       }
                     }}
-                    placeholder="Enter mobile number"
+                    placeholder="Your mobile number"
+                    aria-label="Your mobile number"
                     className="bg-transparent text-sm font-medium w-full focus:outline-none text-slate-900 placeholder:text-slate-400"
                     maxLength={10}
                     disabled={status === 'loading'}
@@ -115,8 +117,8 @@ export default function Hero() {
                   disabled={status === 'loading'}
                   className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all active:scale-95 shadow-md whitespace-nowrap"
                 >
-                  {status === 'loading' ? 'Sending...' : 'Get App Link'}
-                  <ArrowRight size={14} />
+                  <PhoneCall size={14} />
+                  {status === 'loading' ? 'Sending...' : 'Request Callback'}
                 </button>
               </form>
             )}

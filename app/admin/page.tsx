@@ -1,6 +1,7 @@
 import { requireAdmin } from '@/lib/auth';
 import { getAllLeadsUnified, getLeadMetrics } from '@/lib/db';
 import AdminDashboardClient from '@/components/admin/AdminDashboardClient';
+import RequestsPanel from '@/components/admin/RequestsPanel';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -21,10 +22,13 @@ export default async function AdminDashboardPage() {
   const [leads, metrics] = await Promise.all([getAllLeadsUnified(), getLeadMetrics()]);
 
   return (
-    <AdminDashboardClient
-      initialLeads={leads}
-      initialMetrics={metrics}
-      adminUser={session.username}
-    />
+    <div className="bg-black">
+      <AdminDashboardClient
+        initialLeads={leads}
+        initialMetrics={metrics}
+        adminUser={session.username}
+      />
+      <RequestsPanel />
+    </div>
   );
 }
