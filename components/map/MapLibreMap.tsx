@@ -2,7 +2,8 @@
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { useEffect, useRef } from 'react';
-import maplibregl, { type GeoJSONSource } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { GeoJSONSource } from 'maplibre-gl';
 import type { LatLng } from '@/lib/geo';
 
 // Smooth, GPU-drawn map (MapLibre GL) with free OpenFreeMap tiles: no API key, no usage limit.

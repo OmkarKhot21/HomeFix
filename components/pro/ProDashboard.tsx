@@ -91,6 +91,14 @@ export default function ProDashboard({
   const job = feed.activeJob;
   const needsLocation = online || Boolean(job);
 
+  // Start each job with an empty amount and no payment type, so nothing carries over from the last job.
+  const [formJobId, setFormJobId] = useState<string | null>(job?.id ?? null);
+  if ((job?.id ?? null) !== formJobId) {
+    setFormJobId(job?.id ?? null);
+    setAmount('');
+    setPayMethod(null);
+  }
+
   const refresh = useCallback(async () => {
     try {
       const res = await fetch('/api/pro/feed', { cache: 'no-store' });

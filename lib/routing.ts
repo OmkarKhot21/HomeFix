@@ -21,7 +21,20 @@ export interface RouteInfo {
 }
 
 const cache = new Map<string, { at: number; route: RouteInfo }>();
+// Last road route per destination: used when we can't fetch a fresh one, so the
+// line doesn't flicker back to a straight estimate while the pro is moving.
+const lastForDest = new Map<string, RouteInfo>();
 let lastCall = 0;
+
+const destKey = (to: LatLng) => `${to.lat.toFixed(5)},${to.lng.toFixed(5)}`;
+
+/** A slightly old road route is better than a straight line, as long as the pro hasn't moved far. */
+function fallback(from: LatLng, to: LatLng, hit?: RouteInfo): RouteInfo {
+  if (hit) return hit;
+  const prev = lastForDest.get(destKey(to));
+  if (prev && prev.path.length > 1 && distanceKm(prev.path[0], from) < 0.5) return prev;
+  return estimateRoute(from, to);
+}
 
 // ~100 m grid for the moving end, so small GPS jitter reuses the cached route.
 const keyFor = (from: LatLng, to: LatLng) =>
@@ -37,7 +50,7 @@ export async function getRoute(from: LatLng, to: LatLng): Promise<RouteInfo> {
   if (hit && Date.now() - hit.at < CACHE_MS) return hit.route;
 
   // Over the rate budget: serve the last route if we have one, else an estimate.
-  if (Date.now() - lastCall < MIN_GAP_MS) return hit?.route ?? estimateRoute(from, to);
+  if (Date.now() - lastCall < MIN_GAP_MS) return fallback(from, to, hit?.route);
   lastCall = Date.now();
 
   try {
@@ -62,10 +75,12 @@ export async function getRoute(from: LatLng, to: LatLng): Promise<RouteInfo> {
       source: 'road',
     };
     cache.set(key, { at: Date.now(), route });
+    lastForDest.set(destKey(to), route);
     if (cache.size > 500) cache.delete(cache.keys().next().value!);
+    if (lastForDest.size > 500) lastForDest.delete(lastForDest.keys().next().value!);
     return route;
   } catch (err) {
     console.error('[ROUTING] falling back to estimate:', err instanceof Error ? err.message : err);
-    return hit?.route ?? estimateRoute(from, to);
+    return fallback(from, to, hit?.route);
   }
 }

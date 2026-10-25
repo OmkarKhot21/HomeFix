@@ -14,7 +14,10 @@ const PAY_LABEL: Record<string, string> = { upi: 'UPI', cash: 'Cash', card: 'Car
 
 function dayLabel(date: string, short = true) {
   const d = new Date(`${date}T00:00:00+05:30`);
-  return d.toLocaleDateString('en-IN', short ? { day: 'numeric', month: 'short' } : { weekday: 'short', day: 'numeric', month: 'short' });
+  return d.toLocaleDateString(
+    'en-IN',
+    short ? { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short' } : { timeZone: 'Asia/Kolkata', weekday: 'short', day: 'numeric', month: 'short' }
+  );
 }
 
 function niceMax(n: number) {
